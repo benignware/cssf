@@ -1,0 +1,23 @@
+$red = #990000;
+$green = #009900;
+$blue = #000099;
+$gray = #aaaaaa;
+
+$color = $gray;
+
+$primary-rgb = rgba(var(--primary-r), var(--primary-g), var(--primary-b));
+$primary-hsl = hsla(var(--primary-h), var(--primary-s), var(--primary-l));
+
+:root {
+  --primary-r: red($color);
+  --primary-g: green($color);
+  --primary-b: blue($color);
+  --primary-h: hue($color);
+  --primary-s: saturation($color);
+  --primary-l: luminance($color);
+}
+
+.bg-primary {
+  background: rgba(red($primary-hsl), green($primary-hsl), blue($primary-hsl), 1);
+  height: 200px;
+}

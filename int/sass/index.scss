@@ -1,0 +1,65 @@
+$red: #990000;
+$green: #009900;
+$blue: #0000ff;
+$yellow: f-hsla(56, 60%, 50%);
+$yellow-hsl: f-hsla(f-hue($yellow), f-saturation($yellow), f-lightness($yellow));
+$gray: #aaaaaa;
+
+$color: $blue;
+$color-f: f-hsla(var(--primary-h), var(--primary-s), var(--primary-l));
+$color-fr: f-rgba(var(--primary-r), var(--primary-g), var(--primary-b));
+$color-s: f-hsla(f-hue($color), f-saturation($color), f-lightness($color));
+$color-sr: f-rgba(f-red($color), f-green($color), f-blue($color));
+
+@debug($color-s);
+
+:root {
+  --primary-h: #{f-hue($color)};
+  --primary-s: #{f-saturation($color)};
+  --primary-l: #{f-lightness($color)};
+  --primary-r: #{f-red($color)};
+  --primary-g: #{f-green($color)};
+  --primary-b: #{f-blue($color)};
+}
+
+body {
+  font-family: Arial;
+}
+
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+}
+
+.box {
+  height: 100px;
+}
+
+.f-identity {
+  background: $color-f;
+  color: $yellow-hsl;
+}
+
+.s-identity {
+  background: $color-sr;
+}
+
+.f-darken {
+  background: f-darken($color-f, 20%);
+}
+
+.s-darken {
+  background: darken($color-sr, 20%);
+}
+
+.f-mix {
+  background: f-mix($color-fr, $yellow, 50%);
+}
+
+.s-mix {
+  background: mix($color-sr, $yellow, 50%);
+}
