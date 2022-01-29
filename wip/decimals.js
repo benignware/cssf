@@ -1,5 +1,5 @@
 const csstree = require('css-tree');
-const { unit } = require('./lib/utils');
+const { unit } = require('../lib/utils');
 
 const parse = (input) =>
   csstree.parse(!input.match(/\{/) ? `.____root { prop: \n${input}\n}` : input);

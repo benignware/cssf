@@ -1,5 +1,5 @@
-const { compute } = require('./lib/utils');
-const evaluate = require('./lib/eval');
+const { compute } = require('../lib/utils');
+const evaluate = require('../lib/eval');
 
 const multiply = compute('*');
 const add = compute('+');
