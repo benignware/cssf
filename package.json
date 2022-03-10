@@ -2,7 +2,7 @@
   "name": "cssf",
   "version": "0.0.1",
   "description": "Use today's css now",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
     "start": "node int/stylus/server.js",
     "test": "mocha lib/**/*.test.js --timeout 30000",
@@ -11,7 +11,8 @@
     "int:sass": "node int/sass/server.js",
     "docs:build": "./node_modules/.bin/jsdoc lib -r -c .jsdoc.conf -d docs",
     "docs:serve": "http-server docs",
-    "docs": "run-s docs:*"
+    "docs": "run-s docs:*",
+    "demo:build": "node demo/build.js"
   },
   "author": "",
   "license": "ISC",
