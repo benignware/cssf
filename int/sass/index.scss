@@ -1,25 +1,25 @@
 $red: #990000;
 $green: #009900;
 $blue: #0000ff;
-$yellow: f-hsla(56, 60%, 50%);
-$yellow-hsl: f-hsla(f-hue($yellow), f-saturation($yellow), f-lightness($yellow));
+$yellow: cssf-hsla(56, 60%, 50%);
+$yellow-hsl: cssf-hsla(cssf-hue($yellow), cssf-saturation($yellow), cssf-lightness($yellow));
 $gray: #aaaaaa;
 
 $color: $blue;
-$color-f: f-hsla(var(--primary-h), var(--primary-s), var(--primary-l));
-$color-fr: f-rgba(var(--primary-r), var(--primary-g), var(--primary-b));
-$color-s: f-hsla(f-hue($color), f-saturation($color), f-lightness($color));
-$color-sr: f-rgba(f-red($color), f-green($color), f-blue($color));
+$color-f: cssf-hsla(var(--primary-h), var(--primary-s), var(--primary-l));
+$color-fr: cssf-rgba(var(--primary-r), var(--primary-g), var(--primary-b));
+$color-s: cssf-hsla(cssf-hue($color), cssf-saturation($color), cssf-lightness($color));
+$color-sr: cssf-rgba(cssf-red($color), cssf-green($color), cssf-blue($color));
 
 @debug($color-s);
 
 :root {
-  --primary-h: #{f-hue($color)};
-  --primary-s: #{f-saturation($color)};
-  --primary-l: #{f-lightness($color)};
-  --primary-r: #{f-red($color)};
-  --primary-g: #{f-green($color)};
-  --primary-b: #{f-blue($color)};
+  --primary-h: #{cssf-hue($color)};
+  --primary-s: #{cssf-saturation($color)};
+  --primary-l: #{cssf-lightness($color)};
+  --primary-r: #{cssf-red($color)};
+  --primary-g: #{cssf-green($color)};
+  --primary-b: #{cssf-blue($color)};
 }
 
 body {
@@ -39,7 +39,7 @@ th, td {
   height: 100px;
 }
 
-.f-identity {
+.cssf-identity {
   background: $color-f;
   color: $yellow-hsl;
 }
@@ -48,16 +48,16 @@ th, td {
   background: $color-sr;
 }
 
-.f-darken {
-  background: f-darken($color-f, 20%);
+.cssf-darken {
+  background: cssf-darken($color-f, 20%);
 }
 
 .s-darken {
   background: darken($color-sr, 20%);
 }
 
-.f-mix {
-  background: f-mix($color-fr, $yellow, 50%);
+.cssf-mix {
+  background: cssf-mix($color-fr, $yellow, 50%);
 }
 
 .s-mix {
