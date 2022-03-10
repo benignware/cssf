@@ -83,7 +83,7 @@ const libProxy = (lib, options = {}) => {
             `$${name}${
               typeof value !== 'undefined'
                 ? `: ${value.replace(/^\s*{/, '(').replace(/}\s*$/, ')')}`
-                : ''
+                : 'null'
             }`
         )
         .join(', ')})`;
