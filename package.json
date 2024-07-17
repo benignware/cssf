@@ -9,7 +9,7 @@
     "lint": "eslint lib/**/*.js*",
     "lint:fix": "eslint --fix lib/**/*.js*",
     "int:sass": "node int/sass/server.js",
-    "docs:build": "./node_modules/.bin/jsdoc lib -r -c .jsdoc.conf -d docs",
+    "docs:build": "./node_modules/.bin/jsdoc lib -r -c .jsdoc.conf -d docs -t ./node_modules/ink-docstrap/template -R README.md",
     "docs:serve": "http-server docs",
     "docs": "run-s docs:*",
     "demo:build": "node demo/build.js"
@@ -23,6 +23,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "express": "^4.17.1",
     "http-server": "^14.1.0",
+    "ink-docstrap": "^1.3.2",
     "jsdoc": "^3.6.10",
     "mocha": "^9.0.3",
     "npm-run-all": "^4.1.5",
