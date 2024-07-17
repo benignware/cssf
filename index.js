@@ -1,7 +1,3 @@
-const fn = require('./lib');
-const render = require('./lib/render');
+import * as fn from './lib';
 
-module.exports = {
-  ...fn,
-  render
-};
+export default fn;
