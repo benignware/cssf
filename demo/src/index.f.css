@@ -12,11 +12,11 @@
 }
 
 .box:hover {
-  background-color: mix(
+  background-color: colorMix(
     rgba(0, 0, 0, 1),
     rgba(var(--primary-r), var(--primary-g), var(--primary-b), 1)
   );
-  color: contrastColor(mix(
+  color: contrastColor(colorMix(
     rgba(0, 0, 0, 1),
     rgba(var(--primary-r), var(--primary-g), var(--primary-b), 1)
   ));

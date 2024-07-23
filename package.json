@@ -2,10 +2,11 @@
   "name": "cssf",
   "version": "0.0.1",
   "description": "Use today's css now",
-  "main": "index.js",
+  "main": "index.mjs",
+  "type": "module",
   "scripts": {
     "start": "node int/stylus/server.js",
-    "test": "mocha lib/**/*.test.mjs --timeout 30000",
+    "test": "mocha lib/**/color.test.mjs --timeout 30000",
     "lint": "eslint lib/**/*.js*",
     "lint:fix": "eslint --fix lib/**/*.js*",
     "int:sass": "node int/sass/server.js",
