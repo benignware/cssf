@@ -2,7 +2,8 @@
   "name": "cssf",
   "version": "0.0.1",
   "description": "Use today's css now",
-  "main": "index.js",
+  "main": "index.mjs",
+  "type": "module",
   "scripts": {
     "start": "node int/stylus/server.js",
     "test": "mocha lib/**/*.test.mjs --timeout 30000",
