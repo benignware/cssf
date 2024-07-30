@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node int/stylus/server.js",
-    "test": "mocha lib/**/color.test.mjs --timeout 30000",
+    "test": "mocha utils/colors/convertColorSpace.test.mjs --require ./mocha-setup.mjs --timeout 30000",
     "lint": "eslint lib/**/*.js*",
     "lint:fix": "eslint --fix lib/**/*.js*",
     "int:sass": "node int/sass/server.js",
@@ -18,6 +18,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "chai": "^5.1.1",
     "ejs": "^3.1.6",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",

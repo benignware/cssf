@@ -1,6 +1,8 @@
 # CSSF
 
-Use today's css now. CSSF enhances css by a set of functions that take care of your dynamic values at run-time, such as color shade or contrast and lots more. Did you even know that you can actually use conditions in calc? CSSF breaks it down to arithmetics. 
+Use today's css now. CSS pre-processor ecosystem with focus on runtime computation
+
+CSSF enhances css by a set of functions that take care of your dynamic values at run-time, such as color shade or contrast and lots more. Did you even know that you can actually use conditions in calc? CSSF breaks it down to arithmetics. 
 
 
 https://css-tricks.com/a-complete-guide-to-calc-in-css/
@@ -15,6 +17,10 @@ https://supportscss.dev/
 
 https://medium.com/hypersphere-codes/randomness-in-css-b55a0845c8dd
 
+
+https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
+
+https://www.smashingmagazine.com/2023/08/oklch-color-spaces-gamuts-css/
 
 From now on, you can do conditionals in css, e.g. something like the following...
 
