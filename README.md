@@ -22,6 +22,13 @@ https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
 
 https://www.smashingmagazine.com/2023/08/oklch-color-spaces-gamuts-css/
 
+https://www.doozytools.com/color-tools/color-converter
+
+https://www.easyrgb.com/en/convert.php#inputFORM
+
+https://oklch.com/#70,0.1,14,100
+
+
 From now on, you can do conditionals in css, e.g. something like the following...
 
 <!-- Example -->
@@ -137,3 +144,11 @@ console.log('css: ', css);
 
 style.textContent = css;
 ```
+
+
+
+
+## TODO:
+
+* Context-aware unit computations, e.g. width: 100%;
+* @support rule integration

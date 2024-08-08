@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Space Conversion</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            aspect-ratio: 1 / 1;
+        }
+        .color-item, .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .input-group {
+            max-width: 400px;
+        }
+        .color-box-small {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            aspect-ratio: 1 / 1;
+            padding: 0; /* Remove padding for color box */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Color Space Conversion</h1>
+
+        <!-- Selected Colors List -->
+        <div class="mt-4">
+            <h2>Colors</h2>
+            <div id="colorList"></div>
+        </div>
+
+        <!-- Add Color Section -->
+        <div class="mb-3">
+            <h2>Add Color</h2>
+            <div class="color-picker-wrapper">
+                <input type="color" id="colorPicker" class="form-control form-control-color color-box-small" value="#ffffff">
+                <input type="text" id="colorName" class="form-control" placeholder="#ffffff">
+                <button id="addColor" class="btn btn-primary ms-2">Add Color</button>
+            </div>
+        </div>
+
+        <!-- Color Space Checkboxes -->
+        <div class="mt-4">
+            <h2>Color Spaces</h2>
+            <div id="colorSpaces" class="d-flex flex-wrap mb-3"></div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="toggleAllCheckbox">
+                <label class="form-check-label" for="toggleAllCheckbox">Select/Unselect All</label>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div id="resultsContainer" class="mt-4">
+            <h2>Color Conversion Results</h2>
+            <button id="copyDataTop" class="btn btn-secondary mb-2">Copy Data</button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Computed Color</th>
+                        <th>C1</th>
+                        <th>C2</th>
+                        <th>C3</th>
+                        <th>CSS Color</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button id="copyDataBottom" class="btn btn-secondary mt-2">Copy Data</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { collectColorData, COLOR_SPACES, COLORS } from '../setup/collectColorData.mjs';
+
+        let selectedColors = [...COLORS];
+
+        function generateUniqueId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function populateColorSpaceCheckboxes() {
+            const container = document.getElementById('colorSpaces');
+            container.innerHTML = '';
+            COLOR_SPACES.forEach(space => {
+                const checkbox = document.createElement('div');
+                checkbox.className = 'form-check me-3';
+                checkbox.innerHTML = `
+                    <input class="form-check-input" type="checkbox" id="${space}" checked>
+                    <label class="form-check-label" for="${space}">${space}</label>
+                `;
+                container.appendChild(checkbox);
+            });
+        }
+
+        function updateColorList() {
+            const colorList = document.getElementById('colorList');
+            colorList.innerHTML = '';
+
+            selectedColors.forEach(color => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+
+                colorItem.innerHTML = `
+                    <input type="color" value="${color.input}" class="color-box color-box-small">
+                    <input type="text" value="${color.name || ''}" data-id="${color.id}" placeholder="${color.input}" class="form-control me-2">
+                    <button class="btn btn-danger btn-sm" onclick="removeColor('${color.id}')">Remove</button>
+                `;
+
+                colorList.appendChild(colorItem);
+            });
+        }
+
+        function handleFilterChange() {
+            const colorSpaces = getSelectedColorSpaces();
+            const resultsContainer = document.querySelector('#resultsContainer tbody');
+            resultsContainer.innerHTML = '';
+
+            const data = collectColorData({ colors: selectedColors, colorSpaces });
+
+            data.forEach(({ name, input, values }) => {
+                Object.entries(values).forEach(([colorSpace, { cssColor, computedColor, displayColor, components }]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="color-box color-box-small" style="background-color: ${computedColor}"></div>
+                                <pre class="mb-0 d-flex align-items-center"><code>${displayColor}</code></pre>
+                            </div>
+                        </td>
+                        <td valign="middle">
+                            <pre class="mb-0"><code>${components[0]}</code></pre>
+                        </td>
+                        <td valign="middle">
+                            <pre class="mb-0"><code>${components[1]}</code></pre>
+                        </td>
+                        <td valign="middle">
+                            <pre class="mb-0"><code>${components[2]}</code></pre>
+                        </td>
+                        <td valign="middle">
+                            <pre class="mb-0"><code>${cssColor}</code></pre>
+                        </td>
+                    `;
+                    resultsContainer.appendChild(row);
+                });
+            });
+        }
+
+        function addColor(name, value) {
+            if (!selectedColors.find(color => color.input === value)) {
+                selectedColors.push({ id: generateUniqueId(), name, input: value });
+                updateColorList();
+                handleFilterChange();
+            } else {
+                alert('Color with this value already exists.');
+            }
+        }
+
+        window.removeColor = function(id) {
+            selectedColors = selectedColors.filter(color => color.id !== id);
+            updateColorList();
+            handleFilterChange();
+        };
+
+        function getSelectedColorSpaces() {
+            return Array.from(document.querySelectorAll('#colorSpaces input:checked')).map(cb => cb.id);
+        }
+
+        function copyColorData() {
+            const colorSpaces = getSelectedColorSpaces();
+            const data = collectColorData({ colors: selectedColors, colorSpaces });
+            const shortData = {};
+
+            data.forEach(({ name, input, values }) => {
+                const colorNameOrValue = name || input;
+                shortData[colorNameOrValue] = {};
+                Object.entries(values).forEach(([space, { components }]) => {
+                    shortData[colorNameOrValue][space] = components;
+                });
+            });
+
+            navigator.clipboard.writeText(JSON.stringify(shortData, null, 2))
+                .then(() => alert('Color data copied to clipboard'))
+                .catch(err => alert('Failed to copy data: ', err));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateColorSpaceCheckboxes();
+            updateColorList();
+            handleFilterChange();
+
+            const colorList = document.getElementById('colorList');
+            const colorNameInput = document.getElementById('colorName');
+            const colorPicker = document.getElementById('colorPicker');
+            const addColorButton = document.getElementById('addColor');
+            const copyDataTopButton = document.getElementById('copyDataTop');
+            const copyDataBottomButton = document.getElementById('copyDataBottom');
+            const toggleAllCheckbox = document.getElementById('toggleAllCheckbox');
+
+            // Update colorName placeholder on color picker change
+            colorPicker.addEventListener('input', () => {
+                const colorValue = colorPicker.value;
+                colorNameInput.placeholder = colorValue;
+            });
+
+            // Update placeholders of text fields in selected colors list when their color pickers change
+            document.addEventListener('input', (event) => {
+                if (event.target.type === 'color') {
+                    const newValue = event.target.value;
+                    const textField = event.target.nextElementSibling;
+                    if (textField && textField.type === 'text') {
+                        textField.placeholder = newValue;
+                    }
+                }
+            });
+
+            // Handle individual checkbox change
+            document.getElementById('colorSpaces').addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    handleFilterChange();
+                }
+            });
+
+            // Handle text input change in color list
+            colorList.addEventListener('input', (event) => {
+                const input = event.target;
+                if (input.type === 'text') {
+                    const newName = input.value.trim();
+                    const id = input.dataset.id;
+                    const color = selectedColors.find(color => color.id === id);
+                    if (color) {
+                        color.name = newName;
+                        handleFilterChange();
+                    }
+                }
+            });
+
+            // Add color button event
+            addColorButton.addEventListener('click', () => {
+                const colorValue = colorPicker.value;
+                const colorName = colorNameInput.value.trim();
+                addColor(colorName, colorValue);
+                colorNameInput.value = '';
+            });
+
+            // Copy color data button events
+            copyDataTopButton.addEventListener('click', copyColorData);
+            copyDataBottomButton.addEventListener('click', copyColorData);
+
+            // Toggle all checkboxes
+            toggleAllCheckbox.addEventListener('change', (event) => {
+                document.querySelectorAll('#colorSpaces input[type="checkbox"]').forEach(cb => {
+                    cb.checked = event.target.checked;
+                });
+                handleFilterChange();
+            });
+        });
+    </script>
+</body>
+</html>

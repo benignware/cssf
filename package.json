@@ -6,19 +6,22 @@
   "type": "module",
   "scripts": {
     "start": "node int/stylus/server.js",
-    "test": "mocha utils/colors/convertColorSpace.test.mjs --require ./mocha-setup.mjs --timeout 30000",
+    "test": "mocha fn/hsv/*test.mjs --require ./mocha-setup.mjs --timeout 30000 --recursive --experimental-vm-modules",
     "lint": "eslint lib/**/*.js*",
     "lint:fix": "eslint --fix lib/**/*.js*",
     "int:sass": "node int/sass/server.js",
     "docs:build": "./node_modules/.bin/jsdoc lib -r -c .jsdoc.conf -d docs -t ./node_modules/ink-docstrap/template -R README.md",
     "docs:serve": "http-server docs",
     "docs": "run-s docs:*",
-    "demo:build": "node demo/build.js"
+    "demo:build": "node demo/build.js",
+    "test:pw": "playwright test pwtest.mjs"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "chai": "^5.1.1",
+    "chai-deep-closeto": "^0.1.1",
+    "cypress": "^13.13.2",
     "ejs": "^3.1.6",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
@@ -29,15 +32,20 @@
     "jsdoc": "^3.6.10",
     "mocha": "^9.0.3",
     "npm-run-all": "^4.1.5",
+    "playwright": "^1.46.0",
     "prettier": "2.3.2",
+    "puppeteer": "^22.15.0",
     "sass": "^1.37.5",
     "stylus": "^0.54.8"
   },
   "dependencies": {
     "acorn": "^8.4.1",
+    "change-case": "^5.4.4",
     "chroma-js": "2.1.2",
     "css-tree": "^2.3.1",
+    "humps": "^2.0.1",
     "lodash.memoize": "^4.1.2",
-    "postcss-values-parser": "^6.0.0"
+    "postcss-values-parser": "^6.0.0",
+    "selenium-webdriver": "^4.23.0"
   }
 }

@@ -1,0 +1,323 @@
+{
+  "red": {
+    "rgb": {
+      "computedColor": "color(srgb 1 0 0)",
+      "colorSpace": "srgb",
+      "c1": 1,
+      "c2": 0,
+      "c3": 0
+    },
+    "hsl": {
+      "computedColor": "color(srgb 1 0 0)",
+      "colorSpace": "srgb",
+      "c1": 1,
+      "c2": 0,
+      "c3": 0
+    },
+    "hwb": {
+      "computedColor": "color(srgb 1 0 0)",
+      "colorSpace": "srgb",
+      "c1": 1,
+      "c2": 0,
+      "c3": 0
+    },
+    "lab": {
+      "computedColor": "lab(54.29 80.8198 69.8997)",
+      "colorSpace": "lab",
+      "c1": 54.29,
+      "c2": 80.8198,
+      "c3": 69.8997
+    },
+    "lch": {
+      "computedColor": "lch(54.29 106.854 40.856)",
+      "colorSpace": "lch",
+      "c1": 54.29,
+      "c2": 106.854,
+      "c3": 40.856
+    },
+    "oklab": {
+      "computedColor": "oklab(0.627966 0.22488 0.125859)",
+      "colorSpace": "oklab",
+      "c1": 0.627966,
+      "c2": 0.22488,
+      "c3": 0.125859
+    },
+    "oklch": {
+      "computedColor": "oklch(0.627966 0.257704 29.2346)",
+      "colorSpace": "oklch",
+      "c1": 0.627966,
+      "c2": 0.257704,
+      "c3": 29.2346
+    },
+    "xyz": {
+      "computedColor": "color(xyz-d65 0.412426 0.212648 0.0193173)",
+      "colorSpace": "xyz-d65",
+      "c1": 0.412426,
+      "c2": 0.212648,
+      "c3": 0.0193173
+    },
+    "xyz-d65": {
+      "computedColor": "color(xyz-d65 0.412426 0.212648 0.0193173)",
+      "colorSpace": "xyz-d65",
+      "c1": 0.412426,
+      "c2": 0.212648,
+      "c3": 0.0193173
+    },
+    "xyz-d50": {
+      "computedColor": "color(xyz-d50 0.436066 0.222488 0.013916)",
+      "colorSpace": "xyz-d50",
+      "c1": 0.436066,
+      "c2": 0.222488,
+      "c3": 0.013916
+    },
+    "srgb": {
+      "computedColor": "color(srgb 1 0 0)",
+      "colorSpace": "srgb",
+      "c1": 1,
+      "c2": 0,
+      "c3": 0
+    },
+    "display-p3": {
+      "computedColor": "color(display-p3 0.917568 0.200274 0.13854)",
+      "colorSpace": "display-p3",
+      "c1": 0.917568,
+      "c2": 0.200274,
+      "c3": 0.13854
+    },
+    "rec2020": {
+      "computedColor": "color(rec2020 0.792027 0.230963 0.0737053)",
+      "colorSpace": "rec2020",
+      "c1": 0.792027,
+      "c2": 0.230963,
+      "c3": 0.0737053
+    },
+    "a98-rgb": {
+      "computedColor": "color(a98-rgb 0.858635 -0.00641221 -0.00539923)",
+      "colorSpace": "a98-rgb",
+      "c1": 0.858635,
+      "c2": -0.00641221,
+      "c3": -0.00539923
+    },
+    "prophoto-rgb": {
+      "computedColor": "color(prophoto-rgb 0.702263 0.275682 0.103499)",
+      "colorSpace": "prophoto-rgb",
+      "c1": 0.702263,
+      "c2": 0.275682,
+      "c3": 0.103499
+    }
+  },
+  "green": {
+    "rgb": {
+      "computedColor": "color(srgb 0 1 0)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 1,
+      "c3": 0
+    },
+    "hsl": {
+      "computedColor": "color(srgb 0 1 0)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 1,
+      "c3": 0
+    },
+    "hwb": {
+      "computedColor": "color(srgb 0 1 0)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 1,
+      "c3": 0
+    },
+    "lab": {
+      "computedColor": "lab(87.8179 -79.2574 80.9949)",
+      "colorSpace": "lab",
+      "c1": 87.8179,
+      "c2": -79.2574,
+      "c3": 80.9949
+    },
+    "lch": {
+      "computedColor": "lch(87.8179 113.322 134.379)",
+      "colorSpace": "lch",
+      "c1": 87.8179,
+      "c2": 113.322,
+      "c3": 134.379
+    },
+    "oklab": {
+      "computedColor": "oklab(0.866435 -0.23384 0.179502)",
+      "colorSpace": "oklab",
+      "c1": 0.866435,
+      "c2": -0.23384,
+      "c3": 0.179502
+    },
+    "oklch": {
+      "computedColor": "oklch(0.866435 0.294791 142.489)",
+      "colorSpace": "oklch",
+      "c1": 0.866435,
+      "c2": 0.294791,
+      "c3": 142.489
+    },
+    "xyz": {
+      "computedColor": "color(xyz-d65 0.357628 0.715142 0.119175)",
+      "colorSpace": "xyz-d65",
+      "c1": 0.357628,
+      "c2": 0.715142,
+      "c3": 0.119175
+    },
+    "xyz-d65": {
+      "computedColor": "color(xyz-d65 0.357628 0.715142 0.119175)",
+      "colorSpace": "xyz-d65",
+      "c1": 0.357628,
+      "c2": 0.715142,
+      "c3": 0.119175
+    },
+    "xyz-d50": {
+      "computedColor": "color(xyz-d50 0.385147 0.716873 0.0970764)",
+      "colorSpace": "xyz-d50",
+      "c1": 0.385147,
+      "c2": 0.716873,
+      "c3": 0.0970764
+    },
+    "srgb": {
+      "computedColor": "color(srgb 0 1 0)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 1,
+      "c3": 0
+    },
+    "display-p3": {
+      "computedColor": "color(display-p3 0.458607 0.985245 0.298313)",
+      "colorSpace": "display-p3",
+      "c1": 0.458607,
+      "c2": 0.985245,
+      "c3": 0.298313
+    },
+    "rec2020": {
+      "computedColor": "color(rec2020 0.567642 0.959229 0.268934)",
+      "colorSpace": "rec2020",
+      "c1": 0.567642,
+      "c2": 0.959229,
+      "c3": 0.268934
+    },
+    "a98-rgb": {
+      "computedColor": "color(a98-rgb 0.565102 0.999973 0.234599)",
+      "colorSpace": "a98-rgb",
+      "c1": 0.565102,
+      "c2": 0.999973,
+      "c3": 0.234599
+    },
+    "prophoto-rgb": {
+      "computedColor": "color(prophoto-rgb 0.540279 0.927479 0.304514)",
+      "colorSpace": "prophoto-rgb",
+      "c1": 0.540279,
+      "c2": 0.927479,
+      "c3": 0.304514
+    }
+  },
+  "blue": {
+    "rgb": {
+      "computedColor": "color(srgb 0 0 1)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 0,
+      "c3": 1
+    },
+    "hsl": {
+      "computedColor": "color(srgb 0 0 1)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 0,
+      "c3": 1
+    },
+    "hwb": {
+      "computedColor": "color(srgb 0 0 1)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 0,
+      "c3": 1
+    },
+    "lab": {
+      "computedColor": "lab(29.5653 68.3015 -112.035)",
+      "colorSpace": "lab",
+      "c1": 29.5653,
+      "c2": 68.3015,
+      "c3": -112.035
+    },
+    "lch": {
+      "computedColor": "lch(29.5653 131.213 301.368)",
+      "colorSpace": "lch",
+      "c1": 29.5653,
+      "c2": 131.213,
+      "c3": 301.368
+    },
+    "oklab": {
+      "computedColor": "oklab(0.451981 -0.0324624 -0.311523)",
+      "colorSpace": "oklab",
+      "c1": 0.451981,
+      "c2": -0.0324624,
+      "c3": -0.311523
+    },
+    "oklch": {
+      "computedColor": "oklch(0.451981 0.31321 264.051)",
+      "colorSpace": "oklch",
+      "c1": 0.451981,
+      "c2": 0.31321,
+      "c3": 264.051
+    },
+    "xyz": {
+      "computedColor": "color(xyz-d65 0.180452 0.0721746 0.950405)",
+      "colorSpace": "xyz-d65",
+      "c1": 0.180452,
+      "c2": 0.0721746,
+      "c3": 0.950405
+    },
+    "xyz-d65": {
+      "computedColor": "color(xyz-d65 0.180452 0.0721746 0.950405)",
+      "colorSpace": "xyz-d65",
+      "c1": 0.180452,
+      "c2": 0.0721746,
+      "c3": 0.950405
+    },
+    "xyz-d50": {
+      "computedColor": "color(xyz-d50 0.143066 0.0606079 0.714096)",
+      "colorSpace": "xyz-d50",
+      "c1": 0.143066,
+      "c2": 0.0606079,
+      "c3": 0.714096
+    },
+    "srgb": {
+      "computedColor": "color(srgb 0 0 1)",
+      "colorSpace": "srgb",
+      "c1": 0,
+      "c2": 0,
+      "c3": 1
+    },
+    "display-p3": {
+      "computedColor": "color(display-p3 -0.0000623775 -0.000130182 0.959579)",
+      "colorSpace": "display-p3",
+      "c1": -0.0000623775,
+      "c2": -0.000130182,
+      "c3": 0.959579
+    },
+    "rec2020": {
+      "computedColor": "color(rec2020 0.168316 0.0510798 0.946709)",
+      "colorSpace": "rec2020",
+      "c1": 0.168316,
+      "c2": 0.0510798,
+      "c3": 0.946709
+    },
+    "a98-rgb": {
+      "computedColor": "color(a98-rgb -0.00593537 -0.00869226 0.981144)",
+      "colorSpace": "a98-rgb",
+      "c1": -0.00593537,
+      "c2": -0.00869226,
+      "c3": 0.981144
+    },
+    "prophoto-rgb": {
+      "computedColor": "color(prophoto-rgb 0.336185 0.137599 0.922718)",
+      "colorSpace": "prophoto-rgb",
+      "c1": 0.336185,
+      "c2": 0.137599,
+      "c3": 0.922718
+    }
+  }
+}
