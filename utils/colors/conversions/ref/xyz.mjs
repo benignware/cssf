@@ -3,6 +3,7 @@ import { clamp, matrixMultiply } from './utils.mjs';
 import { rgbLinearToRgb, rgbToRgbLinear } from './rgb.mjs';
 
 
+
 // White Point Conversion
 const XyzD65ToXyzD50Matrix = [
   [1.047809, 0.022919, -0.050077],
@@ -54,16 +55,25 @@ export const rgbToXyz = (r, g, b) => {
 };
 
 // Convert XYZ to RGB
-export const xyzToRgb = (x, y, z) => {
-  const [rLinear, gLinear, bLinear] = matrixMultiply(XyzToRgbLinearMatrix, [x, y, z]);
+// export const xyzToRgb = (x, y, z) => {
+//   const [rLinear, gLinear, bLinear] = matrixMultiply(XyzToRgbLinearMatrix, [x, y, z]);
 
-  // Apply gamma correction and clamp the values to [0, 255]
-  return [
-    Math.round(clamp(gammaCorrect(rLinear), 0, 1) * 255),
-    Math.round(clamp(gammaCorrect(gLinear), 0, 1) * 255),
-    Math.round(clamp(gammaCorrect(bLinear), 0, 1) * 255)
-  ];
-};
+//   // Apply gamma correction and clamp the values to [0, 255]
+
+//   const r = clamp(gammaCorrect(rLinear), 0, 1) * 255;
+//   const g = clamp(gammaCorrect(gLinear), 0, 1) * 255;
+//   const b = clamp(gammaCorrect(bLinear), 0, 1) * 255;
+
+//   return [
+//     r, g, b
+//   ];
+
+//   return [
+//     Math.round(r),
+//     Math.round(g),
+//     Math.round(b)
+//   ];
+// };
 
 // Convert from D65 to D50 and vice versa
 export const xyzD65ToXyzD50 = (x, y, z) => matrixMultiply(XyzD65ToXyzD50Matrix, [x, y, z]);
@@ -72,3 +82,15 @@ export const xyzD50ToXyzD65 = (x, y, z) => matrixMultiply(XyzD50ToXyzD65Matrix, 
 // Identity functions for XYZ to XYZ and linear XYZ conversions
 export const xyzToXyzD65 = (x, y, z) => [x, y, z];
 export const xyzD65ToXyz = (x, y, z) => [x, y, z];
+
+
+export const xyzToRgb = (x, y, z) => {
+  const [rLinear, gLinear, bLinear] = matrixMultiply(XyzToRgbLinearMatrix, [x, y, z]);
+
+  // Apply gamma correction and clamp the values to [0, 255]
+  const r = clamp(gammaCorrect(rLinear), 0, 1) * 255;
+  const g = clamp(gammaCorrect(gLinear), 0, 1) * 255;
+  const b = clamp(gammaCorrect(bLinear), 0, 1) * 255;
+
+  return [Math.round(r), Math.round(g), Math.round(b)];
+};

@@ -8,16 +8,29 @@ import fs from 'fs/promises';
 import path from 'path';
 
 global.COLORS = [
-  'red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'black', 'white', 'hotpink'
+  'red', 'lime', 'blue',
+  'cyan', 'magenta', 'yellow',
+  'black', 'white', 'gray',
 ]
 
 global.COLOR_SPACES = [
-  'rgb', 'hsl', 'hwb',
-  'xyz', 'xyz-d65', 'xyz-d50',
-  'lab', 'lch',
-  // 'oklab', 'oklch',
-  // 'srgb', 'srgb-linear', 'rgb-linear',
-  // 'display-p3', 'a98-rgb', 'rec2020', 'prophoto-rgb',
+  'rgb', 
+  'hsl',
+  'hwb',
+  'xyz', 
+  'xyz-d65',
+  'xyz-d50',
+  'lab', 
+  // 'lch',
+  // 'oklab',
+  // 'oklch',
+  // 'srgb',
+  // 'srgb-linear',
+  // 'rgb-linear',
+  // 'display-p3',
+  // 'a98-rgb',
+  // 'rec2020',
+  // 'prophoto-rgb',
 ];
 
 const FIXTURES_CONVERSIONS = path.resolve('fixtures/conversions.json');

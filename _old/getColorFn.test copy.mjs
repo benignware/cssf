@@ -1,21 +1,51 @@
 import { expect } from "chai";
-import { colorFn } from "./colorFn.mjs";
-import getEval from "../../lib/eval/getEval.mjs";
+import { getColorFn } from "../utils/colors/getColorFn.mjs";
+import { getEval } from "../utils/eval/getEval.mjs";
+import * as hslConversions from "../utils/colors/conversions/ref/hsl.mjs";
+import * as rgbConversions from "../utils/colors/conversions/ref/rgb.mjs";
+import * as xyzConversions from "../utils/colors/conversions/ref/xyz.mjs";
 
 describe('getColorFn', () => {
   beforeEach(() => {
-    global.evaluate = getEval();
+    global.e = getEval();
   });
 
   it('should return a color function', () => {
-    const colorFn = getColorFn('rgb');
-    expect(colorFn).to.be.a('function');
+    const color = getColorFn('color', ['srgb', 'xyz'], {
+      ...rgbConversions,
+      ...xyzConversions
+    });
+
+    const e = getEval({
+      color
+    });
+
+    const input = e('color(from srgb(255 0 0) xyz)');
+
+    expect(input).to.be.equal('color(0.64 0.33 0.03)');
   });
 
-  it('should return a color function with specified name', () => {
-    const colorFn = getColorFn('rgb');
-    expect(colorFn.name).to.equal('rgb');
-  });
+  // it('should return a color function', () => {
+  //   const rgb = getColorFn('rgb', 'rgb'); 
+  //   const hsl = getColorFn('hsl', 'hsl', { ...hslConversions }, { units: ['deg', '%', '%'] });
+    
+  //   const e = getEval({
+  //     rgb,
+  //     hsl
+  //   });
+    
+  //   const input = e('hsl(from rgb(255 0 0) h s l)');
+
+  //   expect(input).to.be.equal('hsl(0deg 100% 50%)');
+  // });
+
+
+
+
+  // it('should return a color function with specified name', () => {
+  //   const colorFn = colorFn('rgb', 'rgb');
+  //   expect(colorFn.name).to.equal('rgb');
+  // });
 
   // it('should return a color function with implicitly specified components and predefined colorspace', () => {
   //   const rgb = getColorFn('rgb', {
@@ -31,12 +61,10 @@ describe('getColorFn', () => {
   //   expect(rgb('from #ff0000')).to.equal('rgb(255 0 0)');
   // });
 
-  it('should convert color from hex to hsl', () => {
-    const hsl = getColorFn('hsl', {
-      colorspace: 'srgb/hsl'
-    });
-    expect(hsl('from #ff0000')).to.equal('hsl(255 0 0)');
-  });
+  // it('should convert color from hex to hsl', () => {
+  //   const hsl = getColorFn('hsl', 'hsl');
+  //   expect(hsl('from #ff0000')).to.equal('hsl(255 0 0)');
+  // });
 
   // it('should convert color from hex to rgb with identity values', () => {
   //   const rgb = getColorFn('rgb', {

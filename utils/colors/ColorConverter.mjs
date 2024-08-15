@@ -1,105 +1,116 @@
+import { camelCase, pascalCase, kebabCase } from 'change-case';
+
 export class ColorConverter {
-  constructor(conversions = {}) {
-    this.conversions = {};
+  #conversions;
+  #options;
+
+  constructor(conversions = {}, options = {}) {
+    this.#conversions = {};
+    this.#options = options;
+    this.addConversions(conversions);
+  }
+
+  addConversion(fromSpace, toSpace, func) {
+    if (typeof toSpace === 'function') {
+      func = toSpace;
+      toSpace = fromSpace;
+      fromSpace = undefined;
+    }
+
+    if (typeof fromSpace === 'undefined' || typeof toSpace === 'undefined' || typeof func !== 'function') {
+      throw new Error('Invalid parameters: Both fromSpace and toSpace must be provided with a function.');
+    }
+
+    if (fromSpace && toSpace) {
+      const key = `${camelCase(fromSpace)}To${pascalCase(toSpace)}`;
+      this.#conversions[key] = func;
+    } else {
+      throw new Error('Invalid parameters: Both fromSpace and toSpace must be provided.');
+    }
+  }
+
+  addConversions(conversions) {
+    if (Array.isArray(conversions)) {
+      conversions.forEach(([fromSpace, toSpace, func]) => {
+        if (typeof func !== 'function') {
+          throw new Error('Conversion functions must be provided.');
+        }
+        this.addConversion(fromSpace, toSpace, func);
+      });
+    } else if (typeof conversions === 'object' && conversions !== null) {
+      const colorSpaceKeys = Object.keys(conversions).filter(key => typeof conversions[key] === 'object');
+      if (colorSpaceKeys.length > 0) {
+        colorSpaceKeys.forEach(fromSpace => {
+          const conversionObject = conversions[fromSpace];
+          if (typeof conversionObject !== 'object' || conversionObject === null) {
+            throw new Error('Color space conversions must be provided as an object.');
+          }
+          Object.entries(conversionObject).forEach(([key, func]) => {
+            if (typeof func !== 'function') {
+              throw new Error('Conversion functions must be provided.');
+            }
+            const conversionType = key.startsWith('from') ? 'from' : 'to';
+            const targetSpace = conversionType === 'from' ? fromSpace : key.replace(/^to/, '').toLowerCase();
+            const sourceSpace = conversionType === 'to' ? fromSpace : key.replace(/^from/, '').toLowerCase();
+            this.addConversion(sourceSpace, targetSpace, func);
+          });
+        });
+      } else {
+        Object.entries(conversions).forEach(([key, func]) => {
+          if (typeof func !== 'function') {
+            throw new Error('Conversion functions must be provided.');
+          }
+          const [fromSpace, toSpace] = this.#splitKey(key);
+          this.addConversion(fromSpace, toSpace, func);
+        });
+      }
+    } else {
+      throw new Error('Invalid conversions format. Expected an array or object.');
+    }
+  }
+
+  addColorSpace(colorSpace, conversions) {
+    if (typeof conversions !== 'object' || conversions === null) {
+      throw new Error('Color space conversions must be provided as an object.');
+    }
+
     Object.entries(conversions).forEach(([key, func]) => {
-      this.registerConversion(key, func);
+      if (typeof func !== 'function') {
+        throw new Error('Conversion functions must be provided.');
+      }
+
+      const conversionType = key.startsWith('from') ? 'from' : 'to';
+      const targetSpace = conversionType === 'from' ? colorSpace : key.replace(/^to/, '').toLowerCase();
+      const sourceSpace = conversionType === 'to' ? colorSpace : key.replace(/^from/, '').toLowerCase();
+      this.addConversion(sourceSpace, targetSpace, func);
     });
   }
 
-  // Register a color conversion
-  registerConversion(fromSpace, toSpace, func) {
-    let key;
-  
-    if (typeof toSpace === 'function') {
-      func = toSpace;
-      key = fromSpace;
-    } else {
-      key = `${this.toCamelCase(fromSpace)}To${this.toCamelCase(toSpace)}`;
-    }
-
-    this.conversions[key] = func;
-  }
-
-  // Convert camelCase or PascalCase to hyphen-format
-  toHyphenated(str) {
-    return str
-      .replace(/([a-z])([A-Z])/g, '$1-$2')
-      .toLowerCase();
-  }
-
-  // Convert hyphen-format to camelCase
-  toCamelCase(str) {
-    let result = str.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
-
-    result = result.charAt(0).toLowerCase() + result.slice(1);
-      
-    return result;
-  }
-
-  // Split a conversion key into fromSpace and toSpace
-  splitKey(key) {
-    // Normalize key format
-    const normalizedKey = this.toCamelCase(key);
-    // Match patterns like 'xyzD65ToXyz' or 'prophotoRgbToA98Rgb'
-    const match = normalizedKey.match(/^([a-zA-Z0-9]+)To([a-zA-Z0-9]+)$/);
-    if (!match) throw new Error(`Invalid conversion key format: ${key}`);
-    let [_, fromSpace, toSpace] = match;
-
-    toSpace = this.toCamelCase(toSpace);
-
-    return [fromSpace, toSpace];
-  }
-
-  // Create a conversion pipeline from one color space to another
-  createPipeline(fromSpace, toSpace) {
-    const pipeline = [];
-    const visited = new Set();
-
-    fromSpace = this.toCamelCase(fromSpace);
-    toSpace = this.toCamelCase(toSpace);
-
-    const findPath = (currentSpace, targetSpace) => {
-      if (currentSpace === targetSpace) return true;
-      if (visited.has(currentSpace)) return false;
-
-      visited.add(currentSpace);
-
-      for (const [key, func] of Object.entries(this.conversions)) {
-        
-        const [source, dest] = this.splitKey(key);
-
-        // console.log(currentSpace, 'findPath --->', source, 'DEST: ', dest, targetSpace);
-
-        if (source === currentSpace && dest) {
-          if (findPath(dest, targetSpace)) {
-            pipeline.unshift(func);
-            return true;
-          }
-        }
-      }
-
-      return false;
-    };
-
-    if (!findPath(fromSpace, toSpace)) {
-      return null; // Return null if no path is found
-    }
-
-    return pipeline;
-  }
-
-  // Get all registered conversion methods as an object in camelCase format
   getConversions() {
-    return this.conversions;
+    return this.#conversions;
   }
 
-  // Convert color values from one space to another
-  convertColor(fromSpace, toSpace, ...values) {
-    if (fromSpace === toSpace) {
-      throw new Error(`Source and target color spaces are the same: ${fromSpace}`);
-    }
+  getColorSpaces() {
+    const spaces = new Set();
 
-    const pipeline = this.createPipeline(fromSpace, toSpace);
+    Object.keys(this.#conversions).forEach(key => {
+      const [fromSpace, toSpace] = this.#splitKey(key);
+      spaces.add(fromSpace);
+      spaces.add(toSpace);
+    });
+
+    return Array.from(spaces);
+  }
+
+  convertColor(fromSpace, toSpace, ...values) {
+    fromSpace = camelCase(fromSpace);
+    toSpace = camelCase(toSpace);
+
+    if (fromSpace === toSpace) {
+      return values;
+    }
+    const { transformer } = this.#options;
+    const pipeline = this.#createPipeline(fromSpace, toSpace);
 
     if (!pipeline) {
       throw new Error(`Conversion path from ${fromSpace} to ${toSpace} not found.`);
@@ -109,27 +120,97 @@ export class ColorConverter {
 
     for (const conversion of pipeline) {
       result = conversion(...result);
+
+      if (transformer) {
+        result = transformer(result, fromSpace, toSpace);
+      }
     }
 
     return result;
   }
 
-  // Check if a conversion path exists from fromSpace to toSpace or for a conversionKey
   hasConversion(fromSpaceOrKey, toSpace) {
-    if (typeof toSpace === 'undefined') {
-      // Handle conversionKey format
-      const key = fromSpaceOrKey;
-
-      try {
-        const [fromSpace, toSpace] = this.splitKey(key);
-        return this.createPipeline(fromSpace, toSpace) !== null;
-      } catch (e) {
-        return false;
+    try {
+      if (typeof toSpace === 'undefined') {
+        const key = fromSpaceOrKey;
+        const [fromSpace, toSpace] = this.#splitKey(key);
+        return this.getConversionPath(fromSpace, toSpace).length > 0;
+      } else {
+        const fromSpace = fromSpaceOrKey;
+        return this.getConversionPath(fromSpace, toSpace).length > 0;
       }
-    } else {
-      // Handle fromSpace and toSpace format
-      const fromSpace = fromSpaceOrKey;
-      return this.createPipeline(fromSpace, toSpace) !== null;
+    } catch {
+      return false;
     }
+  }
+
+  #splitKey(key) {
+    const normalizedKey = camelCase(key);
+    const match = normalizedKey.match(/^([a-zA-Z0-9-]+)To([a-zA-Z0-9-]+)$/);
+    if (!match) throw new Error(`Invalid conversion key format: ${key}`);
+    let [_, fromSpace, toSpace] = match;
+    toSpace = camelCase(toSpace);
+    return [fromSpace, toSpace];
+  }
+
+  #createPipeline(fromSpace, toSpace) {
+    const queue = [[fromSpace, []]];
+    const visited = new Set();
+    fromSpace = camelCase(fromSpace);
+    toSpace = camelCase(toSpace);
+
+    while (queue.length > 0) {
+      const [currentSpace, path] = queue.shift();
+
+      if (currentSpace === toSpace) {
+        return path;
+      }
+
+      if (visited.has(currentSpace)) continue;
+
+      visited.add(currentSpace);
+
+      for (const [key, func] of Object.entries(this.#conversions)) {
+        const [source, dest] = this.#splitKey(key);
+
+        if (source === currentSpace) {
+          queue.push([dest, [...path, func]]);
+        }
+      }
+    }
+
+    return null; // No path found
+  }
+
+  getConversionPath(fromSpace, toSpace) {
+    fromSpace = camelCase(fromSpace);
+    toSpace = camelCase(toSpace);
+
+    const pipeline = this.#createPipeline(fromSpace, toSpace);
+
+    if (!pipeline) {
+      throw new Error(`Conversion path from ${fromSpace} to ${toSpace} not found.`);
+    }
+
+    const path = [fromSpace];
+    let currentSpace = fromSpace;
+
+    for (const conversion of pipeline) {
+      for (const [key] of Object.entries(this.#conversions)) {
+        if (conversion === this.#conversions[key]) {
+          const [source, dest] = this.#splitKey(key);
+
+          if (source === currentSpace) {
+            path.push(dest);
+            currentSpace = dest;
+            break;
+          }
+        }
+      }
+    }
+
+    const result = path.map(space => kebabCase(space));
+
+    return result;
   }
 }

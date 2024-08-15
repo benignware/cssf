@@ -152,3 +152,18 @@ style.textContent = css;
 
 * Context-aware unit computations, e.g. width: 100%;
 * @support rule integration
+
+
+
+
+
+Have a look at the code and the tests.
+We want to add a new requirement to the code. It is defined in the very first test which is failing, because the input option isn't processed yet by the code. So, this is going to be a challenge. Let me explain... So, have a look at the output option. The output option allows us to output a color based on some knowledge about the environment rather than having actually registered the corresponding color functions. So, for instance, we want to define a hsv function to extend the native environment for which we assume it has a hsl color function which is capable of all we need. Since we have the hsvToHsl and hslToHsv conversions, we can return a computable color, based on this conversion. 
+Now, we want to do a similar thing to the input of the relative color by adding an input option which should allow us to effectively emulate a color-space respectively color-function. 
+
+Some steps have been done, but it's not quite working.
+
+Make sure, you do not break it. You may refine the last test case, but don't touch the others.
+Please note the comments in the test file.
+Full code of getColorFn.mjs, please. Do not only provide the changed exoported function.
+

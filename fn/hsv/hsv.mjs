@@ -1,19 +1,44 @@
-import { getColorArgs } from '../../utils/colors/getColorArgs.mjs';
+import { getColorFn } from '../../utils/colors/getColorFn.mjs';
+import { eq } from '../eq/eq.mjs';
+import { ifelse } from '../ifelse/ifelse.mjs';
+import { or } from '../or/or.mjs';
 
-const hsvToHsl = (h, s, v) => {
-    const l = v - s * v / 2;
-    const sl = l === 0 || l === 1 ? 0 : (v - l) / Math.min(l, 1 - l);
-    return [ h, sl, l ];
-}
+import { getEval, ENV_2022 } from '../../utils/eval/getEval.mjs';
 
-export const hsv = (h, s, v, alpha = 1) => {
-  const { from, c1, c2, c3, a: colorAlpha } = getColorArgs(h, s, v, alpha);
+const e = getEval(ENV_2022);
 
-  if (!from) {
-    let l;
+const hsvCalcConversions = {
+  hsvToHsl: (h, s, v) => {
+    // console.log('!!!!!! CALC HSV TO HSL', h, s, v);
+    const l = `(2 - ${s}) * ${v} / 2`;
+    const sl = `(${v} - ${l}) / min(${l}, 1 - ${l})`;
+    const c1 = eq(l, 0);
+    const c2 = eq(l, 1);
+    const c = or(c1, c2);
+    const sHsl = ifelse(c, 0, sl);
 
-    [h, s, l] = hsvToHsl(h, s, v);
+    return [h, sHsl, l];
+  },
 
-    return `hsl(${h} ${s} ${l}${alpha !== 1 ? ` / ${alpha}` : ''}`;
+  hslToHsv: (h, s, l) => {
+    // console.log('!!!!!! CALC HSL TO HSV', h, s, l);
+    const delta = `(1 - max(2 * (${l}) - 1, 0))`;
+    const v = `(${l} + ${s} * ${delta} / 2) * 1`; // For some reason, we need to multiply by 1 to get the correct value
+    const c = eq(v, 0);
+    const ss = `2 * (1 - ${l} / ${v})`;
+    const sve = ifelse(c, 0, ss);
+
+    return [h, sve, v];
   }
-}
+};
+
+export const hsv = getColorFn('hsv', 'hsv', { ...hsvCalcConversions }, {
+  output: {
+    colorSpace: 'hsl',
+    format: ([h, s, l]) => {
+      return `hsl(${h} ${s} ${l})`;
+    },
+    units: ['deg', '%', '%']
+  },
+  units: ['deg', '%', '%']
+});

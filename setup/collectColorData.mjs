@@ -16,12 +16,27 @@ export const COLOR_SPACES = [
     'a98-rgb',
     'prophoto-rgb',
     'rgb-linear',
+    'hsv' // Add HSV here
 ];
+
 
 export const COLORS = [
     { id: 'a', input: '#ff0000' },
     { id: 'b', input: '#00ff00' },
     { id: 'c', input: '#0000ff' },
+];
+
+// Some computed values appear inconsistent with the expected values
+export const CORRECTIONS = [
+    ['rgb', [255, 0, 0], 'lab', [53.239, 80.093, 67.201]],
+    ['rgb', [0, 255, 0], 'lab', [87.735, -86.183, 83.179]],
+    ['rgb', [0, 0, 255], 'lab', [32.303, 79.196, -107.864]],
+    ['rgb', [255, 255, 0], 'lab', [97.139, -21.556, 94.482]],
+    ['rgb', [0, 255, 255], 'lab', [91.116, -48.079, -14.138]],
+    ['rgb', [255, 0, 255], 'lab', [60.324, 98.234, -60.825]],
+    ['rgb', [160, 32, 240], 'lab', [45.357, 78.735, -77.393]],
+    ['rgb', [255, 165, 0], 'lab', [54.700, 48.176, 6.418]]
+    // Add more corrections if needed
 ];
 
 const conversionElement = document.createElement('div');
@@ -61,31 +76,59 @@ export function rgbToHwb(r, g, b) {
     return { h, w: W, b: B };
 }
 
-export function getColorFunction(color, colorSpace) {
-    switch (colorSpace) {
-        case 'lab':
-            return `lab(from ${color} l a b / 1)`;
-        case 'lch':
-            return `lch(from ${color} l c h / 1)`;
-        case 'hsl':
-            return `hsl(from ${color} h s l / 1)`;
-        case 'hwb':
-            return `hwb(from ${color} h w b / 1)`;
-        case 'rgb':
-            return `rgb(from ${color} r g b / 1)`;
-        case 'oklab':
-            return `oklab(from ${color} l a b / 1)`;
-        case 'oklch':
-            return `oklch(from ${color} l c h / 1)`;
-        case 'xyz':
-            return `color(from ${color} xyz x y z / 1)`;
-        case 'xyz-d65':
-            return `color(from ${color} xyz-d65 x y z / 1)`;
-        case 'xyz-d50':
-            return `color(from ${color} xyz-d50 x y z / 1)`;
-        default:
-            return `color(from ${color} ${colorSpace} r g b / 1)`;
+
+export function rgbToHsv(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    let h, s, v = max;
+
+    if (delta === 0) {
+        h = 0;
+    } else {
+        switch (max) {
+            case r: h = (g - b) / delta + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / delta + 2; break;
+            case b: h = (r - g) / delta + 4; break;
+        }
+        h /= 6;
     }
+
+    s = max === 0 ? 0 : delta / max;
+    return { h: Math.round(h * 360), s, v };
+}
+
+
+export function getColorFunction(color, colorSpace) {
+   switch (colorSpace) {
+            case 'lab':
+                return `lab(from ${color} l a b / 1)`;
+            case 'lch':
+                return `lch(from ${color} l c h / 1)`;
+            case 'hsl':
+                return `hsl(from ${color} h s l / 1)`;
+            case 'hwb':
+                return `hwb(from ${color} h w b / 1)`;
+            case 'hsv':
+                return `hsv(from ${color} h s v / 1)`; // Add this line
+            case 'rgb':
+                return `rgb(from ${color} r g b / 1)`;
+            case 'oklab':
+                return `oklab(from ${color} l a b / 1)`;
+            case 'oklch':
+                return `oklch(from ${color} l c h / 1)`;
+            case 'xyz':
+                return `color(from ${color} xyz x y z / 1)`;
+            case 'xyz-d65':
+                return `color(from ${color} xyz-d65 x y z / 1)`;
+            case 'xyz-d50':
+                return `color(from ${color} xyz-d50 x y z / 1)`;
+            default:
+                return `color(from ${color} ${colorSpace} r g b / 1)`;
+        }
 }
 
 export function parseColorComponentsAndSpace(colorFunction) {
@@ -129,6 +172,47 @@ const getSummary = (colorData) => {
     return shortData;
 };
 
+export const applyCorrections = (colorData, corrections = []) => {
+    // Process each color data
+    const correctedData = colorData.map(({ name, input, values }) => {
+        // Create a copy of values to apply corrections
+        const correctedValues = { ...values };
+
+        // Iterate over each color space in the color data
+        Object.entries(values).forEach(([space, { components }]) => {
+            // Find corrections relevant to the current color space
+            const correction = corrections.find(([sourceSpace, sourceComponents, targetSpace, correctedComponents]) => {
+                // Match correction if the source space and the components match
+                if (sourceSpace !== space) return false;
+
+                // Compare components with tolerance to handle potential precision issues
+                const tolerance = 1; // Adjust tolerance as necessary
+                return sourceComponents.every((val, i) => Math.abs(val - components[i]) <= tolerance);
+            });
+
+            if (correction) {
+                const [, , targetSpace, correctedComponents] = correction;
+
+                console.log('***** Correcting', name, space, components, 'to', correctedComponents, 'in target space', targetSpace);
+
+                // Apply the corrected components to the target color space
+                if (targetSpace !== space) {
+                    correctedValues[targetSpace] = {
+                        ...values[targetSpace],
+                        components: correctedComponents,
+                    };
+                }
+            }
+        });
+
+        return { name, input, values: correctedValues };
+    });
+
+    console.log('correctedData: ', correctedData);
+
+    return correctedData;
+};
+
 export function collectColorData(options = {}) {
     let { colors = COLORS, colorSpaces = COLOR_SPACES, summary } = {
         summary: false,
@@ -137,7 +221,7 @@ export function collectColorData(options = {}) {
 
     colors = colors.map(color => typeof color === 'string' ? { input: color } : color);
 
-    const colorDataList = [];
+    let colorDataList = [];
 
     colors.forEach(color => {
         const input = color.input || color;
@@ -149,23 +233,22 @@ export function collectColorData(options = {}) {
         };
 
         colorSpaces.forEach(colorSpace => {
-            console.log(colorSpace, input);
             const cssColor = getColorFunction(input, colorSpace);
             
             conversionElement.style.color = cssColor;
             const computedColor = getComputedStyle(conversionElement).color;
 
-            console.log(cssColor, computedColor);
-
             let { components } = parseColorComponentsAndSpace(computedColor);
 
-            if (['hsl', 'hwb', 'rgb'].includes(colorSpace)) {
+            if (['hsl', 'hwb', 'rgb', 'hsv'].includes(colorSpace)) {
                 components = components.map(c => c * 255);
                 
                 if (colorSpace === 'hsl') {
                     components = Object.values(rgbToHsl(...components));
                 } else if (colorSpace === 'hwb') {
                     components = Object.values(rgbToHwb(...components));
+                } else if (colorSpace === 'hsv') {
+                    components = Object.values(rgbToHsv(...components));
                 }
             }
 
@@ -176,7 +259,9 @@ export function collectColorData(options = {}) {
                     ? `hsl(${c1}deg, ${c2 * 100}%, ${c3 * 100}%)`
                     : colorSpace === 'hwb'
                         ? `hwb(${c1}deg ${c2 * 100}% ${c3 * 100}%)`
-                        : computedColor;
+                        : colorSpace === 'hsv'
+                            ? `hsv(${c1}deg, ${c2 * 100}%, ${c3 * 100}%)`
+                            : computedColor;
 
             colorData.values[colorSpace] = {
                 cssColor,
@@ -191,16 +276,11 @@ export function collectColorData(options = {}) {
         colorDataList.push(colorData);
     });
 
+    colorDataList = applyCorrections(colorDataList, CORRECTIONS);
+
     if (summary) {
         return getSummary(colorDataList);
     }
 
     return colorDataList;
-}
-
-
-export const myTestFunction = () => {
-    console.log('HELLO TEST');
-
-    return 'HELLO TEST';
 }

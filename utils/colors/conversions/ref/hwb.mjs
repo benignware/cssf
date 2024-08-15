@@ -3,14 +3,13 @@ import { hslToRgb, rgbToHsl } from './hsl.mjs';
 
 // HWB to RGB
 export const hwbToRgb = (h, W, B) => {
-  h = clamp(h, 0, 360) / 360;
+  // h = clamp(h, 0, 360) / 360;
   W = clamp(W, 0, 1);
   B = clamp(B, 0, 1);
 
   // Convert HWB to HSL
-  const hsl = hslToRgb(h * 360, 1, 0.5);
+  const hsl = hslToRgb(h, 1, 0.5);
   const w = W * 255;
-  const b = B * 255;
 
   // Interpolate RGB values
   return [

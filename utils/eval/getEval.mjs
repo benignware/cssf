@@ -1,10 +1,15 @@
+import { CSS } from '../ast/CSS.mjs';
+import { Env } from '../env/Env.mjs';
 import { unwrap } from '../calc/unwrap.mjs';
+
+import { valueTransformer } from './transformers/valueTransformer.mjs';
+import toJS from './toJs.mjs';
+
 import { hasVars } from '../calc/vars.mjs';
 import { parseFn } from '../ast/parseFn.mjs';
 import { compute } from '../calc/compute.mjs';
 
-import * as baseEnv from './env.mjs';
-import toJS from './toJs.mjs';
+import { ENV_2022, ENV_2023, ENV_2024, ENV_NEXT } from './env.mjs';
 
 const OPERATORS = {
   '+': '_add',
@@ -19,63 +24,123 @@ const coreEnv = {
   ...Object.fromEntries(
     Object.entries(OPERATORS).map(([op, fn]) => [fn, compute(op)])
   )
-}
+};
 
-export const getEval = (env = {}, options = {}) => {
+export const getEval = (customEnv = {}, baseEnv = ENV_2024) => {
+  const evalEnv ={ ...coreEnv, ...baseEnv, ...customEnv };
+
+  // console.log('evalEnv:', Object.keys(evalEnv));
+
   let e;
 
   e = (input, context = {}, options = {}) => {
     const { evalResult = true } = options;
+    // Function handler to wrap the function calls
+    const handler = {
+      apply(target, thisArg, args) {
+        let result = Reflect.apply(target, thisArg, args);
 
-    const fn = Object.keys(env)
-      .filter((key) => typeof env[key] === 'function')
-      .filter((key) => !['add', 'subtract', 'multiply', 'divide'].includes(key))
-      .reduce((acc, key) => {
-        acc[key] = (...args) => {
-          let result = env[key](...args);
+        const [name] = parseFn(result) || [];
 
-          const [name] = parseFn(result) || [];
-
-          if (typeof result !== 'string' || name === key) {
-            return result;
-          }
-
-          result = e(result, context, options);
-          
+        if (typeof result !== 'string' || name === target.name) {
           return result;
         }
-        return acc;
-      }, {});
-    
-    const evalEnv = {
-      ...coreEnv,
-      ...baseEnv,
-      ...fn,
-      _var: null,
+
+        result = e(result, context, options);
+
+        return result;
+      }
     };
 
-    const js = toJS(input, {
-      operators: OPERATORS,
-      validIdentifiers: Object.keys(evalEnv),
+    // Ensure `customEnv` functions are valid before creating proxies
+    const validCustomEnv = Object.fromEntries(
+      Object.entries(customEnv).filter(([_, func]) => typeof func === 'function')
+    );
+
+    let fn = Object.fromEntries(
+      Object.entries(validCustomEnv).map(([name, func]) => [name, new Proxy(func, handler)])
+    );
+
+    fn = {
+      ...evalEnv,
+      ...fn,
+      _var: null
+    };
+
+    const beforeEnv = Env.getEnv();
+  
+    Env.setEnv(evalEnv);
+  
+    let result = CSS.stringify(input, {
+      transformers: [
+        valueTransformer((input) => {
+          const js = toJS(input, {
+            operators: OPERATORS,
+            validIdentifiers: ['_var', ...Object.keys(evalEnv)]
+          });
+      
+          const f = new Function('__context', ...Object.keys(evalEnv), `{
+            const _var = (name) => {
+              return typeof __context[name] !== 'undefined' ? __context[name] : 'var(' + name + ')';
+            }
+            try {
+              return ${js}
+            } catch (e) {
+              console.error(e);
+            }
+          }`);
+          
+          let result = f(context, ...Object.values(evalEnv));
+      
+          result = unwrap(result);
+      
+          if (Number.isNaN(result) || typeof result === 'undefined') {
+            return typeof input === 'object' ? CSS.stringify(input) : input;
+          }
+
+          return result;
+        })
+      ]
     });
 
-    const f = new Function('__context', ...Object.keys(evalEnv), `{
-      const _var = (name) => {
-        return typeof __context[name] !== 'undefined' ? __context[name] : 'var(' + name + ')';
-      }
-      try {
-        return ${js}
-      } catch (e) {
-        console.error(e);
-      }
-    }`);
+    Env.setEnv(beforeEnv);
+
+    // const js = toJS(input, {
+    //   operators: OPERATORS,
+    //   validIdentifiers: ['_var', ...Object.keys(evalEnv)]
+    // });
+
+    // const f = new Function('__context', ...Object.keys(evalEnv), `{
+    //   const _var = (name) => {
+    //     return typeof __context[name] !== 'undefined' ? __context[name] : 'var(' + name + ')';
+    //   }
+    //   try {
+    //     return ${js}
+    //   } catch (e) {
+    //     console.error(e);
+    //   }
+    // }`);
+
+    // const beforeEnv = Env.getEnv();
+
+    // // console.log('EVAL ENV: ', Object.keys(evalEnv), 'BEFORE: ', Object.keys(beforeEnv));
+
+    // Env.setEnv(evalEnv);
     
-    let result = f(context, ...Object.values(evalEnv));
+    // let result = f(context, ...Object.values(evalEnv));
 
-    result = unwrap(result);
+    // Env.setEnv(beforeEnv);
 
-    if (result === NaN || typeof result === 'undefined') {
-      return input;
+    // result = unwrap(result);
+
+    // if (Number.isNaN(result) || typeof result === 'undefined') {
+    //   return input;
+    // }
+
+    
+
+    if (typeof result === 'object') {
+      throw new Error('Result is an object: ' + JSON.stringify(result));
     }
 
     if (!evalResult) {
@@ -83,9 +148,12 @@ export const getEval = (env = {}, options = {}) => {
     }
 
     const contextKeys = Object.keys(context);
+    const unresolvedVars = contextKeys.length && hasVars(result, contextKeys);
+    const unresolvedCalc = typeof result === 'string' && result.includes('calc(');
+    const unresolvedIdentifiers = typeof result === 'string' && /\s+\w|\w\s+/.test(result);
+    const evalAgain = (unresolvedVars || unresolvedCalc) // && !unresolvedIdentifiers;
 
-    // If the result is has no context vars anymore but still has calc calls then we need to evaluate it again
-    const evalAgain = typeof result == 'string' && contextKeys.length && result.includes('calc(') && !hasVars(result, contextKeys);
+    // console.log('evalAgain: ', evalAgain);
 
     if (evalAgain) {
       result = e(result, context, { evalResult: false });
@@ -94,7 +162,9 @@ export const getEval = (env = {}, options = {}) => {
     result = unwrap(result);
 
     return result;
-  }
+  };
   
   return e;
-}
+};
+
+export { ENV_2022, ENV_2023, ENV_2024, ENV_NEXT };

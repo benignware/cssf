@@ -88,6 +88,8 @@ export const collectColorData = async (options = {}) => {
     await browser.close();
 
     // Output the result to a local file
+
+    console.log('RESULT:', result);
     const data = JSON.parse(result);
 
     if (!jsonOptions) {

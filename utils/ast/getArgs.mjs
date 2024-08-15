@@ -15,7 +15,9 @@ export const getArgs = (fn, options = {}) => {
     const isArgumentSeparator = node.type === 'Operator';
   
     if (!isArgumentSeparator) {
+      // console.log('node: ', node);
       let str = CSS.stringify(node);
+      // console.log('node: ', str);
 
       if (_stripCalc) {
         str = stripCalc(str);

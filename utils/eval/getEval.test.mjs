@@ -1,62 +1,66 @@
 import { expect } from 'chai';
 import assert from 'assert';
-import { getEval } from './getEval.mjs';
-
-// Sample environment and options for the tests
-const baseEnv = {};
-const options = {};
-
-// Create the evaluation function using getEval
-const evalFn = getEval(baseEnv, options);
+import { getEval, ENV_2022, ENV_2023, ENV_2024, ENV_NEXT } from './getEval.mjs';
+import { Env } from '../env/Env.mjs';
 
 describe('Evaluation Tests', () => {
-  // Basic and important arithmetic tests
   it('should evaluate addition inside calc', () => {
-    const result = evalFn('calc(3 + 4)');
+    const e = getEval();
+    const result = e('calc(3 + 4)');
     expect(result).to.equal(7);
   });
 
   it('should evaluate subtraction inside calc', () => {
-    const result = evalFn('calc(10 - 4)');
+    const e = getEval();
+    const result = e('calc(10 - 4)');
     expect(result).to.equal(6);
   });
 
   it('should evaluate multiplication inside calc', () => {
-    const result = evalFn('calc(3 * 4)');
+    const e = getEval();
+    const result = e('calc(3 * 4)');
     expect(result).to.equal(12);
   });
 
   it('should evaluate division inside calc', () => {
-    const result = evalFn('calc(12 / 4)');
+    const e = getEval();
+    const result = e('calc(12 / 4)');
     expect(result).to.equal(3);
   });
 
   it('evaluates unit expression', () => {
-    assert.strictEqual(evalFn('10px'), '10px');
+    const e = getEval();
+    assert.strictEqual(e('10px'), '10px');
   });
 
   it('evaluates calc expression', () => {
-    assert.strictEqual(evalFn('calc(10px * 2)'), '20px');
+    const e = getEval();
+    assert.strictEqual(e('calc(10px * 2)'), '20px');
   });
 
   it('evaluates addition with units', () => {
-    assert.strictEqual(evalFn('calc(10px + 20px)'), '30px');
+    const e = getEval();
+    assert.strictEqual(e('calc(10px + 20px)'), '30px');
   });
 
   it('evaluates arithmetic with floating points', () => {
-    assert.strictEqual(evalFn('calc(0.5 / 10 * 4.9406564584124654e-323 / 4.9406564584124654e-323)'), 0.1);
+    const e = getEval();
+    assert.strictEqual(e('calc(0.5 / 10 * 4.9406564584124654e-323 / 4.9406564584124654e-323)'), 0.1);
   });
 
   it('evaluates expression containing min', () => {
-    assert.strictEqual(evalFn('min(10 + 50 * 2, 20)'), 20);
+    const e = getEval();
+    assert.strictEqual(e('min(10 + 50 * 2, 20)'), 20);
   });
 
   it('evaluates expression containing max', () => {
-    assert.strictEqual(evalFn('max(10 + 50 * 2, 20)'), 110);
+    const e = getEval();
+    assert.strictEqual(e('max(10 + 50 * 2, 20)'), 110);
   });
 
   it('evaluates dynamic expression', () => {
-    assert.strictEqual(evalFn(
+    const e = getEval();
+    assert.strictEqual(e(
       'calc((var(--a) + var(--b)) * var(--c))',
       {
         '--a': 1,
@@ -67,27 +71,33 @@ describe('Evaluation Tests', () => {
   });
 
   it('evaluates constants', () => {
-    assert.strictEqual(evalFn('pi'), Math.PI);
+    const e = getEval();
+    assert.strictEqual(e('pi'), Math.PI);
   });
 
   it('evaluates calc with constants', () => {
-    assert.strictEqual(evalFn('calc(pi * 2)'), Math.PI * 2);
+    const e = getEval();
+    assert.strictEqual(e('calc(pi * 2)'), Math.PI * 2);
   });
 
   it('correctly resolves infinity constant', () => {
-    assert.strictEqual(evalFn('infinity'), Infinity);
+    const e = getEval();
+    assert.strictEqual(e('infinity'), Infinity);
   });
 
   it('correctly resolves negative infinity constant', () => {
-    assert.strictEqual(evalFn('-infinity'), -Infinity);
+    const e = getEval();
+    assert.strictEqual(e('-infinity'), -Infinity);
   });
 
   xit('resolves to negative zero when computing constants', () => {
-    assert.strictEqual(evalFn('calc(1 / -infinity)'), -0);
+    const e = getEval();
+    assert.strictEqual(e('calc(1 / -infinity)'), -0);
   });
 
   it('doesn\'t evaluate undefined functions', () => {
-    assert.strictEqual(evalFn('xyz(0, 0, 0)'), 'xyz(0, 0, 0)');
+    const e = getEval();
+    assert.strictEqual(e('xyz(0, 0, 0)'), 'xyz(0, 0, 0)');
   });
 
   it('splits consecutive arguments', () => {
@@ -122,8 +132,96 @@ describe('Evaluation Tests', () => {
 
   it('splits and joins concatenated arguments', () => {
     const input = 'xyz(in srgb, rgba(255, 0, 255, 1) 50%, #00f 50%)';
-    const result = evalFn(input);
+    const e = getEval();
+    const result = e(input);
 
     assert.strictEqual(result, 'xyz(in srgb, rgba(255, 0, 255, 1) 50%, #00f 50%)');
+  });
+
+  it('should correctly use and verify the custom environment function', () => {
+    function custom(name, ...args) {
+      const env = Env.getEnv();
+      const self = Object.values(env).find(fn => fn === custom);
+
+      return `${self.name}(${name}, ${args.join(', ')})`;
+    }
+
+    const e = getEval({ custom });
+
+    const result = e('custom(var(--a), 10px, calc(5 + 5))', {
+      '--a': 'value',
+    });
+
+    expect(result).to.equal('custom(value, 10px, 10)');
+  });
+
+  it('should evaluate stylesheet', () => {
+    const e = getEval();
+    const input = `
+      .example {
+        width: calc(123px + 456px);
+      }
+    `;
+    const expectedOutput = `
+      .example {
+        width: 579px;
+      }
+    `;
+    expect(e(input)).to.be.cssEquivalent(expectedOutput);
+  });
+
+  describe('Environment Tests', () => {
+    it('should use default base environment when no arguments are passed', () => {
+      const e = getEval();
+      const result = e('calc(5 + 3)');
+      expect(result).to.equal(8);
+    });
+  
+    it('should use custom functions only without base environment', () => {
+      const customEnv = {
+        add: (a, b) => a + b,
+      };
+      const e = getEval(customEnv);
+      const result = e('add(2, 3)');
+      expect(result).to.equal(5);
+    });
+  
+    it('should use specified preset as base environment', () => {
+      const e = getEval({}, ENV_2022);
+      const result = e('(calc(max(5, 3)))');
+      // Replace `someFunction` with an actual function from env22
+      expect(result).to.equal(5);
+    });
+  
+    it('should use custom functions with a specified preset', () => {
+      const customEnv = {
+        multiply: (a, b) => a * b,
+      };
+      const e = getEval(customEnv, ENV_2023);
+      const result = e('multiply(4, 5)');
+      expect(result).to.equal(20);
+    });
+  
+    it('should correctly handle environment presets with empty custom env', () => {
+      const e = getEval({}, ENV_NEXT);
+      const result = e('abs(-123)');
+      // Replace `abs` with an actual function from envNext
+      expect(result).to.equal(123);
+    });
+  
+    it('should correctly handle environment presets with no custom env', () => {
+      const e = getEval(ENV_NEXT);
+      const result = e('abs(-123)');
+      // Replace `abs` with an actual function from envNext
+      expect(result).to.equal(123);
+    });
+
+    it('should use both custom functions and base environment preset', () => {
+      const e = getEval({
+        customFunc: (x) => `calc((${x}) * 2)`
+      }, ENV_2023);
+    
+      expect(e('customFunc(2)')).to.be.equal(4);
+    });
   });
 });

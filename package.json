@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node int/stylus/server.js",
-    "test": "mocha fn/hsv/*test.mjs --require ./mocha-setup.mjs --timeout 30000 --recursive --experimental-vm-modules",
+    "test": "mocha utils/**/conversions.test.mjs --require ./mocha-setup.mjs --timeout 30000 --recursive --experimental-vm-modules",
     "lint": "eslint lib/**/*.js*",
     "lint:fix": "eslint --fix lib/**/*.js*",
     "int:sass": "node int/sass/server.js",

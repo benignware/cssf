@@ -22,13 +22,17 @@ export const toJS = (input, options = {}) => {
 
   let ast;
 
-  try {
-    ast = CSS.parse(input, {
-      context: 'value'
-    });
-  } catch (e) {
-    console.error(e);
-    return;
+  if (typeof input === 'string') {
+    try {
+      ast = CSS.parse(input, {
+        // context: 'value'
+      });
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+  } else {
+    ast = input;
   }
   
   const transformers = [
@@ -49,7 +53,7 @@ export const toJS = (input, options = {}) => {
         try {
           ast = transformer.call(this, ast);
         } catch (e) {
-          // console.error(e);
+          console.error(e);
         }
         return ast;
       },

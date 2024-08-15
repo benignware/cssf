@@ -148,7 +148,7 @@ describe('env', () => {
     });
 
     it('should return NaN for negative input', () => {
-      expect(e('sqrt(-4)')).to.be.NaN;
+      expect(e('sqrt(-4)')).to.be.equal('NaN');
     });
 
     it('should return 0 for input 0', () => {
@@ -202,7 +202,7 @@ describe('env', () => {
     });
 
     it('should return NaN', () => {
-      expect(e('NaN')).to.be.NaN;
+      expect(e('NaN')).to.be.equal('NaN');
     });
 
     it('should return Infinity', () => {
