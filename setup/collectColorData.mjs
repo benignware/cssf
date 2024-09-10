@@ -35,8 +35,16 @@ export const CORRECTIONS = [
     ['rgb', [0, 255, 255], 'lab', [91.116, -48.079, -14.138]],
     ['rgb', [255, 0, 255], 'lab', [60.324, 98.234, -60.825]],
     ['rgb', [160, 32, 240], 'lab', [45.357, 78.735, -77.393]],
-    ['rgb', [255, 165, 0], 'lab', [54.700, 48.176, 6.418]]
-    // Add more corrections if needed
+    ['rgb', [255, 165, 0], 'lab', [54.700, 48.176, 6.418]],
+    // LCH
+    ['rgb', [255, 0, 0], 'lch', [53.239, 104.551, 39.999]],
+    ['rgb', [0, 255, 0], 'lch', [87.735, 104.551, 120.001]],
+    ['rgb', [0, 0, 255], 'lch', [32.303, 104.551, 240.001]],
+    ['rgb', [255, 255, 0], 'lch', [97.139, 104.551, 90.001]],
+    ['rgb', [0, 255, 255], 'lch', [91.116, 104.551, 210.001]],
+    ['rgb', [255, 0, 255], 'lch', [60.324, 104.551, 330.001]],
+    ['rgb', [160, 32, 240], 'lch', [45.357, 104.551, 300.001]],
+    ['rgb', [255, 165, 0], 'lch', [54.700, 49.999, 39.999]]
 ];
 
 const conversionElement = document.createElement('div');
@@ -180,8 +188,9 @@ export const applyCorrections = (colorData, corrections = []) => {
 
         // Iterate over each color space in the color data
         Object.entries(values).forEach(([space, { components }]) => {
+
             // Find corrections relevant to the current color space
-            const correction = corrections.find(([sourceSpace, sourceComponents, targetSpace, correctedComponents]) => {
+            const filtered = corrections.filter(([sourceSpace, sourceComponents, targetSpace, correctedComponents]) => {
                 // Match correction if the source space and the components match
                 if (sourceSpace !== space) return false;
 
@@ -190,10 +199,8 @@ export const applyCorrections = (colorData, corrections = []) => {
                 return sourceComponents.every((val, i) => Math.abs(val - components[i]) <= tolerance);
             });
 
-            if (correction) {
+            for (const correction of filtered) {
                 const [, , targetSpace, correctedComponents] = correction;
-
-                console.log('***** Correcting', name, space, components, 'to', correctedComponents, 'in target space', targetSpace);
 
                 // Apply the corrected components to the target color space
                 if (targetSpace !== space) {
@@ -203,6 +210,7 @@ export const applyCorrections = (colorData, corrections = []) => {
                     };
                 }
             }
+
         });
 
         return { name, input, values: correctedValues };
@@ -277,6 +285,8 @@ export function collectColorData(options = {}) {
     });
 
     colorDataList = applyCorrections(colorDataList, CORRECTIONS);
+
+    console.log(colorDataList);
 
     if (summary) {
         return getSummary(colorDataList);

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCSS to CSS Conversion</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.11.1/sass.min.js"></script>
+    <style>
+        /* Default styling if SCSS file is not available or fails to load */
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          padding: 20px;
+        }
+
+        .test {
+          color: hsl(240deg calc((((0) * ((calc((1 - (clamp(0, (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2) - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2))) / 1e-14, 1))))))) + (((((0) * ((1 - (calc((1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - ((2 - (1)) * (1) / 2)) / 1e-14, 1))))))) * (1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 1) / 1e-14, 1))) * (1 - (clamp(0, ((1) - ((2 - (1)) * (1) / 2)) / 1e-14, 1)))))))))))) + (((1 - (2 - (1)) * (1) / 2) / min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2)) * (1 - ((1 - (calc((1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - ((2 - (1)) * (1) / 2)) / 1e-14, 1))))))) * (1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 1) / 1e-14, 1))) * (1 - (clamp(0, ((1) - ((2 - (1)) * (1) / 2)) / 1e-14, 1))))))))))))))) * (1 - ((calc((1 - (clamp(0, (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2) - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2))) / 1e-14, 1)))))))))) calc((2 - (1)) * (1) / 2));
+        }
+    </style>
+</head>
+<body>
+    <h1>SCSS to CSS Example</h1>
+    <div class="test">
+      Hello World
+    </div>
+    <script type="importmap">
+        {
+          "imports": {
+            "sass": "https://jspm.dev/sass",
+            "css-tree": "https://jspm.dev/css-tree",
+            "change-case": "https://jspm.dev/change-case",
+            "lodash.memoize": "https://jspm.dev/lodash.memoize",
+            "cssf": "./index.mjs",
+            "cssf/peer/sass": "./peer/sass.mjs"
+          }
+        }
+    </script>
+    <script type="module">
+      import * as sass from 'sass';
+      import scssf from 'cssf/peer/sass';
+
+      console.log('scssf', scssf.env);
+
+        const INPUT = './main.scss'; // The SCSS file to fetch and compile
+
+        async function loadAndCompileScss(url) {
+
+          console.log('loadAndCompileScss', url);
+            // try {
+              // const sass = await import('https://jspm.dev/sass');
+              
+              console.log('sass', sass);
+              console.log('ss sass.compileString', sass.compileString);
+
+              // Fetch the SCSS file
+              const response = await fetch(url);
+              if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              const scssContent = await response.text();
+
+              function helloWorld(a = 'Hello', b = 'World') {
+                console.log('helloWorld   A:', a, 'B:', b);
+                return `"${a} ${b}"`;
+              }
+
+              scssf.clear();
+
+              scssf.use(helloWorld);
+
+              console.log('scssf', scssf.env);
+
+              const css = scssf(scssContent);
+
+              console.log(css);
+
+              // Create a <style> element with the compiled CSS
+              const style = document.createElement('style');
+              style.textContent = css;
+              document.head.appendChild(style);
+        }
+
+        // Load and compile the SCSS file on page load
+        console.log('INPUT', INPUT);
+        loadAndCompileScss(INPUT);
+    </script>
+</body>
+</html>

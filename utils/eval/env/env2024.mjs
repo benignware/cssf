@@ -18,6 +18,7 @@ export const rem = (x, y) => {
 };
 
 export const mod = (x, y) => {
+  // console.log('*+++++ **** MOD', x, y);
   if (isNumber(x) && isNumber(y)) {
     const divisor = max(0, number(y)); // Prevent division by zero
     if (divisor === 0) return 'NaN'; // Gracefully handle division by zero

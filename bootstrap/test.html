@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Test</title>
+  <style>
+    body {
+      font-family: var(--font-family);
+      color: var(--text-color);
+      background-color: var(--background-color);
+      border-color: var(--border-color);
+    }
+
+    .box {
+      width: 100px;
+      height: 100px;
+      border: 2px solid var(--border-color);
+      background-color: var(--primary-color);
+      margin: 20px;
+    }
+
+    .text {
+      font-size: var(--font-size);
+      font-weight: var(--font-weight);
+    }
+
+    .container {
+      padding: 20px;
+      background-color: var(--background-color);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Alert styles */
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      font-size: var(--font-size);
+      font-family: var(--font-family);
+    }
+
+    .alert-success {
+      color: var(--success-color);
+      border-color: var(--success-color);
+    }
+
+    .alert-warning {
+      color: var(--warning-color);
+      border-color: var(--warning-color);
+    }
+
+    .alert-error {
+      color: var(--error-color);
+      border-color: var(--error-color);
+    }
+
+    .alert-info {
+      color: var(--info-color);
+      border-color: var(--info-color);
+    }
+
+    /* Fancy button styles */
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: var(--font-size);
+      font-weight: var(--font-weight);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color, #6c757d); /* Fallback color */
+      color: #ffffff;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: #ffffff;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: #ffffff;
+    }
+
+    .btn-error {
+      background-color: var(--error-color);
+      color: #ffffff;
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+      color: #ffffff;
+    }
+
+    .form-control {
+      margin-bottom: 20px;
+      border-width: var(--border-width);
+      border-color: var(--border-color);
+      border-style: solid;
+      background-color: var(--background-color);
+      padding: 0.5rem 1rem;
+    }
+  </style>
+</head>
+<body data-colorScheme="light">
+  <div class="container">
+    <h1>Theme Switcher</h1>
+    <label>
+      <input type="radio" name="theme" value="light" checked>
+      Light Theme
+    </label>
+    <label>
+      <input type="radio" name="theme" value="dark">
+      Dark Theme
+    </label>
+
+    <div class="box"></div>
+    <p class="text">This is some text with primary color background.</p>
+    <p class="text">Text color should change based on the theme.</p>
+    <div>
+      <input type="text" class="form-control" placeholder="Enter your name">
+    </div>
+
+    <!-- New Alerts -->
+    <div class="alert alert-success">
+      Success! Your operation was completed successfully.
+    </div>
+    <div class="alert alert-warning">
+      Warning! Please check your inputs.
+    </div>
+    <div class="alert alert-error">
+      Error! Something went wrong.
+    </div>
+    <div class="alert alert-info">
+      Info! Here is some important information.
+    </div>
+
+    <!-- Shuffle Button -->
+    <button id="shuffle-btn" class="btn btn-primary">Shuffle</button>
+  </div>
+
+  <script src="test.mjs" type="module"></script>
+</body>
+</html>

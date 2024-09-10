@@ -1,10 +1,15 @@
 import { number, unit } from './number.mjs';
+import { stripCalc } from './stripCalc.mjs';
 
 export const toUnit = (value, toUnit) => {
   // Check for calc expressions
-  if (typeof value === 'string' && value.startsWith('calc')) {
-    return value; // Simply return calc expression as is for now
-  }
+  // if (typeof value === 'string' && value.startsWith('calc')) {
+  //   switch (toUnit) {
+  //     case '%':
+  //       return `calc(${stripCalc(value)}) * 100%)`;
+  //     case 'deg':
+  //       return `${n}deg`;
+  // }
 
   const n = number(value);
   const u = unit(value);
@@ -13,18 +18,33 @@ export const toUnit = (value, toUnit) => {
     return value;
   }
 
-  if (isNaN(n) || toUnit === null) {
-    return value;
+  // if (isNaN(n) || toUnit === null) {
+  //   return value;
+  // }
+
+  if (!isNaN(n)) {
+    switch (toUnit) {
+      case '%':
+        return `${n * 100}%`;
+      case 'deg':
+        return `${n}deg`;
+      case 'turn':
+        return `${n / 360}turn`;
+      default:
+        return value; // Default case if unit is unknown
+    }
   }
+
+  const unwrapped = stripCalc(value);
 
   switch (toUnit) {
     case '%':
-      return `${n * 100}%`;
+      return `calc(${unwrapped} * 100%)`;
     case 'deg':
-      return `${n}deg`;
+      return `calc(${unwrapped} * 1deg)`;
     case 'turn':
-      return `${n / 360}turn`;
-    default:
-      return value; // Default case if unit is unknown
+      return `calc(${unwrapped} / 360 * 1turn)`; 
   }
+
+  return value;
 };

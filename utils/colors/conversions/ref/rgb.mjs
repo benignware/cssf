@@ -1,12 +1,4 @@
-// Gamma correction constants
-const GAMMA = 2.4;
-const GAMMA_CORRECT_THRESHOLD = 0.04045;
-
-// Helper function to apply gamma correction
-const applyGammaCorrection = (c, toLinear) =>
-  toLinear
-    ? (c <= GAMMA_CORRECT_THRESHOLD ? c / 12.92 : Math.pow((c + 0.055) / 1.055, GAMMA))
-    : (c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / GAMMA) - 0.055);
+import { applyGammaCorrection } from './utils.mjs';
 
 // Convert from linear RGB to sRGB (gamma-corrected)
 export const rgbLinearToSrgb = (r, g, b) =>
@@ -25,7 +17,6 @@ export const rgbLinearToSrgbLinear = (r, g, b) => {
 // Implement srgbLinearToRgbLinear function
 export const srgbLinearToRgbLinear = (r, g, b) =>
   srgbToRgbLinear(r, g, b);
-
 
 
 // Convert from sRGB (gamma-corrected) to linear RGB

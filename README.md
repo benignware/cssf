@@ -28,6 +28,8 @@ https://www.easyrgb.com/en/convert.php#inputFORM
 
 https://oklch.com/#70,0.1,14,100
 
+https://colordesigner.io/convert/hsvtohsl
+
 
 From now on, you can do conditionals in css, e.g. something like the following...
 

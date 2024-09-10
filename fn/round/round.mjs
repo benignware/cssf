@@ -36,7 +36,7 @@ const _round = (value) => {
 
   value = stripCalc(value);
 
-  return `calc(((${value}) * ${SHF} / ${SHF})`;
+  return `(((${value}) * ${SHF} / ${SHF})`;
 }
 
 // const floor = (value) => {

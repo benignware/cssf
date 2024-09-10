@@ -4,7 +4,8 @@ import { operatorTransformer } from "./transformers/operatorTransformer.mjs";
 import { calcTransformer } from "./transformers/calcTransformer.mjs";
 
 import { CSS } from '../ast/CSS.mjs';
-import { unwrap } from "../calc/unwrap.mjs";
+// import { unwrap } from "../calc/unwrap.mjs";
+import { unwrap } from "../calc/number.mjs";
 
 
 export const toJS = (input, options = {}) => {
@@ -39,7 +40,7 @@ export const toJS = (input, options = {}) => {
     operatorTransformer({
       operators,
     }),
-    calcTransformer(),
+    // calcTransformer(),
     literalTransformer({
       validIdentifiers,
       undef: '_undef',
@@ -60,6 +61,7 @@ export const toJS = (input, options = {}) => {
       ast
     )
   );
+
 
   output = unwrap(output);
 

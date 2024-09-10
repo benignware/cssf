@@ -2,6 +2,7 @@ export * from './ref/rgb.mjs';
 
 export * from './ref/hsl.mjs';
 export * from './ref/hwb.mjs';
+export * from './ref/hsv.mjs';
 
 export * from './ref/xyz.mjs';
 

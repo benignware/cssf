@@ -17,6 +17,7 @@ export const min = (...values) => {
 };
 
 export const max = (...values) => {
+  // console.log('MAX', values);
   const u = values
     .map(value => unit(value))
     .filter(u => u && u !== '%')[0] || '';
@@ -30,10 +31,14 @@ export const max = (...values) => {
 };
 
 export const clamp = (() => {
+  
   const _min = min;
   const _max = max;
 
-  return (min, value, max) => _max(min, _min(value, max));
+  return (min, value, max) => {
+    // console.log('CLAMP, ', min, value, max);
+    return _max(min, _min(value, max));
+  };
 })();
 
 // export const rgb = getColorFn('rgb', 'rgb', {}, { legacyFormat: true });

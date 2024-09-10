@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node int/stylus/server.js",
-    "test": "mocha utils/**/conversions.test.mjs --require ./mocha-setup.mjs --timeout 30000 --recursive --experimental-vm-modules",
+    "test": "mocha fn/**/hsv.test.mjs --require ./mocha-setup.mjs --bail --timeout 30000 --recursive --experimental-vm-modules",
     "lint": "eslint lib/**/*.js*",
     "lint:fix": "eslint --fix lib/**/*.js*",
     "int:sass": "node int/sass/server.js",
@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "bootstrap": "^5.3.3",
     "chai": "^5.1.1",
     "chai-deep-closeto": "^0.1.1",
     "cypress": "^13.13.2",
@@ -35,7 +36,7 @@
     "playwright": "^1.46.0",
     "prettier": "2.3.2",
     "puppeteer": "^22.15.0",
-    "sass": "^1.37.5",
+    "sass": "^1.77.8",
     "stylus": "^0.54.8"
   },
   "dependencies": {

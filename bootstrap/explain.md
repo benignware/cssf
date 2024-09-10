@@ -1,0 +1,3 @@
+# Why use data-attributes over WebComponents in this case?
+
+We want the form's markup to match the underlying framework's markup rigourously. So, theme-editor-kit doesn't need to know anything about it. Therefore, we don't need shadow dom here since that wouldn't let the styles pass through to the inputs. Applying the global styles back to the shadow dom feels hackish. Data-attributes provide a simple declarative syntax to setup our form generically.

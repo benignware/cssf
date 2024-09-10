@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Customizer</title>
+    <link rel="stylesheet" href="/bootstrap/dist/index.css">
+    <link rel="stylesheet" href="/bootstrap/preview.css">
+    <style>
+        [hidden] {
+            display: none;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark" data-bs-spy="scroll" data-bs-target="#navbar-example" data-bs-offset="50" tabindex="0">
+    <header data-slot="header" data-part="/bootstrap/parts/header.html"></header>
+    <main class="d-flex">
+        <div class="sidebar p-3">
+            <div data-slot="form" data-part="/bootstrap/parts/form.html"></div>
+        </div>
+        <div class="main py-4">
+            <div class="container">
+                <div data-slot="main" data-part="/bootstrap/parts/examples.html">
+                </div>
+            </div>
+        </div>
+        <div class="toc">
+            <div data-slot="pagenav" data-part="/bootstrap/parts/pagenav.html"></div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="stylesheetModal" tabindex="-1" aria-labelledby="stylesheetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="stylesheetModalLabel">Generated Stylesheet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="stylesheet-textarea" class="form-control" readonly rows="10"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="copy-to-clipboard-btn">Copy to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer data-slot="footer" data-part="/bootstrap/parts/footer.html"></footer>
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/bootstrap/loadPartials.mjs" type="module"></script>
+    <script src="/bootstrap/themeForm.mjs" type="module"></script>
+    <script src="/bootstrap/syncElements.mjs" type="module"></script>
+    <!-- <script src="/bootstrap/setupFonts.mjs" type="module"></script>
+    
+    <script src="/bootstrap/syncElements.mjs" type="module"></script>-->
+    <script src="/bootstrap/shuffleTheme.mjs" type="module"></script> 
+</body>
+</html>

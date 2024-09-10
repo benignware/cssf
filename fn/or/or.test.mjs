@@ -20,4 +20,8 @@ describe('or', () => {
   it('returns 0 if a and b is both 0', () => {
     expect(e(`calc(${or(0, 0)})`)).to.equal(0);
   });
+
+  it ('accepts multiple arguments', () => {
+    expect(e(`calc(${or(0, 0, 0, 1)})`)).to.equal(1);
+  });
 });

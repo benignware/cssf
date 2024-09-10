@@ -2,7 +2,7 @@ import * as csstree from 'css-tree';
 
 export const valueTransformer = (callback = (input) => input) => (ast) => {
   csstree.walk(ast, {
-    leave(node, item, list = []) {
+    leave(node) {
       const isValue = node.type === 'Value';
       
       if (isValue) {

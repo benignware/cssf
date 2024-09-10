@@ -1,4 +1,4 @@
-import { isNumber, number, unit } from './number.mjs';
+import { isNumber, number, unit, unwrap } from './number.mjs';
 import { stripCalc } from './stripCalc.mjs';
 
 const isTerm = value =>
@@ -6,10 +6,14 @@ const isTerm = value =>
 
 export const compute = operator => {
   const fn = (a, b) => {
+    // console.log('COMPUTE', a, operator, b);
+    // let as = unwrap(a);
+    // let bs = unwrap(b);
     let as = stripCalc(a);
     let bs = stripCalc(b);
 
-    if (isNumber(a) && isNumber(b)) {
+    if (!isNaN(number(as)) && !isNaN(number(bs))) {
+      // console.log('AS', as, 'BS', bs);
       const av = number(as);
       const bv = number(bs);
       const au = unit(a);
@@ -28,9 +32,14 @@ export const compute = operator => {
       }
     }
 
-    if (operator === '+' && ((!isTerm(a) && !isNumber(as)) || (!isTerm(b) && !isNumber(bs)))) {
-      return `${a}${b}`;
-    }
+    // console.log('AS', a, 'BS', b);
+
+    // if (operator === '+' && ((!isTerm(a) && !isNumber(as)) || (!isTerm(b) && !isNumber(bs)))) {
+    //   return `${a}${b}`;
+    // }
+
+    return `calc(${as} ${operator} ${bs})`;
+    return `${as} ${operator} ${bs}`;
 
     return `calc(${(isTerm(as) ? `(${as})` : as)} ${operator} ${(isTerm(bs) ? `(${bs})` : bs)})`;
   };

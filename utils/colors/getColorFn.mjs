@@ -1,12 +1,12 @@
 import { kebabCase } from 'change-case';
 import { getColorArgs } from './getColorArgs.mjs';
 import { ColorConverter } from './ColorConverter.mjs';
-import { replaceIdentifiers } from '../ast/replaceIdentifiers.mjs';
+import { replaceIdentifiers, hasIdentifiers } from '../ast/replaceIdentifiers.mjs';
 import { parseFn } from '../ast/parseFn.mjs';
 import { hexToRgb } from './hexToRgb.mjs';
 import { isColorKey, keyToRgb } from './keyToRgb.mjs';
 import { Env } from '../env/Env.mjs';
-import { isNumber, number, unit } from '../calc/number.mjs';
+import { isNumber, number, unit, unwrap } from '../calc/number.mjs';
 import { toNumeric } from '../calc/toNumeric.mjs';
 import { toUnit } from '../calc/toUnit.mjs';
 import { stripCalc } from '../calc/stripCalc.mjs';
@@ -15,6 +15,7 @@ const isChar = (input) => typeof input === 'string' && /^[a-z]$/u.test(input);
 const isFunction = (input) => typeof input === 'string' && input.match(/^\w+\(.*\)$/);
 const isHex = (input) => typeof input === 'string' && !!input.match(/^#[0-9a-f]{3,6}$/i);
 const isIdentifier = (input) => typeof input === 'string' && !!input.match(/^[a-z][a-z0-9-_]*$/i);
+// const hasIdentifiers = (input) => typeof input === 'string' && !!input.match(/^[a-z][a-z0-9-_]*\s*\(.*\)$/i);
 
 export const colorConverter = new ColorConverter();
 
@@ -26,8 +27,10 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
   const { colorSpace: inputColorSpace, identifiers: inputIdentifiers, funcName: inputFuncName, units: inputUnits = ['', '', ''] } = input;
 
   colorConverter.addConversions(conversions);
-
-  const colorSpaces = Array.isArray(colorSpace) ? colorSpace : [colorSpace];
+  
+  const isMultiColorSpace = Array.isArray(colorSpace);
+  const colorSpaces = isMultiColorSpace ? colorSpace : [colorSpace];
+  
   let colorSpaceIdentifiers = colorSpaces.reduce((acc, space) => {
       const ids = space.slice(space.length - 3);
       acc[space] = ids;
@@ -46,11 +49,20 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
   );
 
   function fn(...args) {
-      const input = args.join(', ');
+      const input = [...arguments].join(', ');
       let { from, colorSpace: argSpace, c1, c2, c3, a } = getColorArgs(input);
+
+      // console.log();
+      // console.log('-------------------');
+      // console.log('* ', name, ' - ', `${name}(${input})`);
+
       let fnName = name;
 
       let wasConverted = false;
+
+      let outFrom = null;
+
+      let result = null;
 
       if (from) {
           const toSpace = argSpace && colorSpaces.includes(argSpace) ? argSpace : colorSpace;
@@ -68,14 +80,13 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
               fromColorArgs = getColorArgs(fromArgs.join(', '));
 
               if (fn && colorEnv.has(fn)) {
-                  const { colorSpace: fnSpace, identifiers: fromIdentifiers } = colorEnv.get(fn);
+                const { colorSpace: fnSpace, identifiers: fromIdentifiers } = colorEnv.get(fn);
 
-                  fromSpace = fromColorArgs.colorSpace || fnSpace;
+                fromSpace = fromColorArgs.colorSpace || fnSpace;
               } else {
-                
-                if (['rgb', 'rgba'].includes(fromName)) {
-                    fromSpace = 'rgb';
-                }
+                // if (['rgb', 'rgba'].includes(fromName)) {
+                //     fromSpace = 'rgb';
+                // }
               }
                 
           } else if (isHex(from)) {
@@ -86,21 +97,39 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
             fromSpace = 'rgb';
           }
 
+          if (!fromSpace) {
+            if (inputColorSpace) {
+              fromSpace = inputColorSpace;
+              fromColorArgs = [...inputIdentifiers];
+              outFrom = `from ${inputFuncName}(from ${from})`;
+            }
+          }
+
           if (fromSpace) {
-            if (fromSpace === toSpace) {
-                f = [...fromColorArgs];
-                // f = f.map(toNumeric);
-            } else if (colorConverter.hasConversion(fromSpace, toSpace)) {
-                f = [...fromColorArgs];
+            const needsConversion = fromSpace !== toSpace;
+            const hasConversion = colorConverter.hasConversion(fromSpace, toSpace);
+            const isValidConversion = needsConversion && hasConversion || !needsConversion;
+
+            if (isValidConversion) {
+              f = [...fromColorArgs];
+
+              if (!wasConverted) {
                 f = f.map(toNumeric);
-                f = colorConverter.convertColor(fromSpace, toSpace, ...f);
-                f = f.map(v => `calc(${stripCalc(v)})`);
                 wasConverted = true;
+              }
+
+              f = f.map(v => stripCalc(v));
+            }
+            
+            if (needsConversion && hasConversion) {
+              f = colorConverter.convertColor(fromSpace, toSpace, ...f);
             }
           }
 
           if (!f) {
-              return `${name}(${input})`; // Return input if conversion fails
+            result = `${name}(${input})`; // Return input if conversion fails
+
+            return result;
           }
 
           const identifiers = colorSpaceIdentifiers[toSpace] || [];
@@ -124,25 +153,31 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
               v = replaceIdentifiers(v, cMap);
               return v;
           });
+
+          // const identifiersLeft = [c1, c2, c3].some(v => hasIdentifiers(v, Object.keys(cMap)));
+
+          // if (identifiersLeft) {
+          //   // console.log('!!!! ', 'identifiers left');
+          //   const s = `${name}(${input})`;
+          //   // console.log('!!!! ', s);
+
+          //   return s
+          // }
       }
 
       if (outputColorSpace) {
-        console.log('HAS OUTPUT COLOR SPACE', [c1, c2, c3]);
+        // console.log('> ', `to ${outputColorSpace}`);
           if (colorConverter.hasConversion(colorSpace, outputColorSpace)) {
-            console.log('HAS CONVERSION', [c1, c2, c3]);
             let c = [c1, c2, c3]
-
-            console.log('was converted before?', wasConverted);
             
             if (!wasConverted) {
               c = c.map(toNumeric);
+              wasConverted = true;
             }
 
-            console.log('CONVERTING', c, 'FROM', colorSpace, 'TO', outputColorSpace);
+            c = c.map(v => stripCalc(v));
 
             let converted = colorConverter.convertColor(colorSpace, outputColorSpace, ...c);
-
-            wasConverted = true;
 
             fnName = outputFuncName || kebabCase(outputColorSpace);
             [c1, c2, c3] = converted;
@@ -150,12 +185,21 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
       }
 
       let c = [c1, c2, c3];
-      
+
+      c = c.map(v => {
+        const w = unwrap(`calc(${stripCalc(v)})`);
+
+        return w;
+      });
+  
       c = c.map((v, i) => toUnit(v, outputUnits[i] || units[i]), wasConverted);
+      
+
+      // console.log('$ ', `${fnName}(${c.join(', ')})`);
 
       [c1, c2, c3] = c;
 
-      let outputArgs = [ argSpace, c1, c2, c3]
+      let outputArgs = [ outFrom, argSpace, c1, c2, c3]
         .filter(arg => typeof arg !== 'undefined' && arg !== null)
         .join(legacyFormat ? ', ' : ' ')
 
@@ -164,10 +208,20 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
         outputArgs += a;
       }
 
-      return `${fnName}(${outputArgs})`;
+      result = `${fnName}(${outputArgs})`;
+
+      return result;
   }
 
-  Object.defineProperty(fn, 'name', { value: name, writable: false });
+  const argNames = isMultiColorSpace ? ['colorspace', 'c1', 'c2', 'c3'] : colorSpaceIdentifiers[colorSpace];
+
+  const f = new Function('fn', 'argNames', `
+    return function ${name}(${argNames.join(', ')}) {
+      return fn(...arguments);
+    }
+  `)(fn, argNames || []);
+
+  Object.defineProperty(f, 'name', { value: name, writable: false });
 
   const meta = {
       name,
@@ -177,7 +231,7 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
       fn,
   };
 
-  colorEnv.set(fn, meta);
+  colorEnv.set(f, meta);
 
-  return fn;
+  return f;
 };

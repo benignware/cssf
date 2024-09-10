@@ -22,7 +22,10 @@ export const acos = x => Math.acos(rad(x));
 export const atan = x => Math.atan(rad(x));
 export const atan2 = (y, x) => Math.atan2(number(y), number(x));
 
-export const pow = (x, y) => Math.pow(number(x), number(y));
+export const pow = (x, y) => {
+  // console.log('pow', number(x), number(y), Math.pow(number(x), number(y)));
+  return Math.pow(Math.abs(number(x)), number(y));
+}
 
 export const sqrt = x => number(x) < 0 ? 'NaN' : Math.sqrt(number(x));
 

@@ -28,6 +28,12 @@ describe('Evaluation Tests', () => {
     expect(result).to.equal(3);
   });
 
+  it("should not evaluate expressions that can't be resolved", () => {
+    const e = getEval();
+    const result = e('calc(l + 4)');
+    expect(result).to.equal('calc(l + 4)');
+  });
+
   it('evaluates unit expression', () => {
     const e = getEval();
     assert.strictEqual(e('10px'), '10px');

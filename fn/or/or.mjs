@@ -7,7 +7,8 @@ import { and } from '../and/and.mjs';
  * @param {(number|string)} b Another css expression that resolves to either 0 or 1
  * @returns {string} A css expression that resolves to either 0 or 1
  */
-export function or(a, b) {
-  return not(and(not(a), not(b)));
+export function or(...args) {
+  return args.reduce((acc, arg) => {
+    return not(and(not(acc), not(arg)));
+  });
 }
-

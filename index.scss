@@ -1,0 +1,11 @@
+@import "~/bootstrap/scss/bootstrap.scss";
+
+body {
+  --bg-color: #{hsv(240deg, 100%, 100%)};
+  --text-color: #{colorContrast(var(--bg-color), '#000', '#fff')};
+  background-color: var(--bg-color);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
+}

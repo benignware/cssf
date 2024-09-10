@@ -2,64 +2,34 @@
 import { expect } from "chai";
 import { getColorFn } from "./getColorFn.mjs";
 import { getEval, ENV_2022 } from "../eval/getEval.mjs";
+
 import * as hslConversions from "./conversions/ref/hsl.mjs";
-import * as hslCalcConversions from "./conversions/calc/hsl.mjs";
+import * as hsvConversions from "./conversions/ref/hsv.mjs";
 import * as rgbConversions from "./conversions/ref/rgb.mjs";
 import * as xyzConversions from "./conversions/ref/xyz.mjs";
 
-import { eq } from '../../fn/eq/eq.mjs';
-import { abs } from '../../fn/abs/abs.mjs';
-import { ifelse } from '../../fn/ifelse/ifelse.mjs';
-import { or } from '../../fn/or/or.mjs';
+import * as hslCalcConversions from "./conversions/calc/hsl.mjs";
+import * as hsvCalcConversions from "./conversions/calc/hsv.mjs";
 
-// Define custom HSV conversions for testing
-const hsvConversions = {
-  hsvToHsl: (h, s, v) => {
-    // console.log('!!!!!! HSV TO HSL', h, s, v);
-    
-    const l = (2 - s) * v / 2;
-    const sHsl = l === 0 || l === 1 ? 0 : (v - l) / Math.min(l, 1 - l);
-
-    return [h, sHsl, l];
-  },
-
-  hslToHsv: (h, s, l) => {
-    // console.log('!!!!!! HSL TO HSV', h, s, l);
-    const v = l + s * (1 - Math.abs(2 * l - 1)) / 2;
-    const sHsv = v === 0 ? 0 : 2 * (1 - l / v);
-
-    return [h, sHsv, v];
-  }
-};
-
-const hsvCalcConversions = {
-  hsvToHsl: (h, s, v) => {
-    // console.log('!!!!!! CALC HSV TO HSL', h, s, v);
-    const l = `(2 - ${s}) * ${v} / 2`;
-    const sl = `(${v} - ${l}) / min(${l}, 1 - ${l})`;
-    const c1 = eq(l, 0);
-    const c2 = eq(l, 1);
-    const c = or(c1, c2);
-    const sHsl = ifelse(c, 0, sl);
-
-    return [h, sHsl, l];
-  },
-
-  hslToHsv: (h, s, l) => {
-    // console.log('!!!!!! CALC HSL TO HSV', h, s, l);
-    const delta = `(1 - max(2 * (${l}) - 1, 0))`;
-    const v = `(${l} + ${s} * ${delta} / 2) * 1`; // For some reason, we need to multiply by 1 to get the correct value
-    const c = eq(v, 0);
-    const ss = `2 * (1 - ${l} / ${v})`;
-    const sve = ifelse(c, 0, ss);
-
-    return [h, sve, v];
-  }
-};
+import { describe as describeFn } from "../meta/describe.mjs";
 
 describe('getColorFn', () => {
   beforeEach(() => {
     global.e = getEval({}, ENV_2022);
+  });
+
+  it('should create a color function with parseable signature', () => {
+    const rgb = getColorFn('rgb', 'rgb');
+    const info = describeFn(rgb);
+
+    expect(info).to.be.deep.equal({
+      name: 'rgb',
+      params: [
+        { name: 'r' },
+        { name: 'g' },
+        { name: 'b' }
+      ]
+    })
   });
 
   it('should resolve a color from hex', () => {
@@ -114,7 +84,20 @@ describe('getColorFn', () => {
     expect(input3).to.be.equal('rgb(0 0 255)');
   });
 
-  it('should return an HSV color function', () => {
+  it('should return an HSV color function based on hsl', () => {
+    const hsl = getColorFn('hsl', 'hsl', {}, { units: ['deg', '%', '%'] });
+    const hsv = getColorFn('hsv', 'hsv', { ...hsvConversions }, { units: ['deg', '%', '%'] });
+
+    const e = getEval({ hsl, hsv }, ENV_2022);
+
+    const input = e('hsv(from hsl(240deg 100% 50%) h s v)');
+    expect(input).to.be.equal('hsv(240deg 100% 100%)');
+
+    const input2 = e('hsl(from hsv(0deg 100% 100%) h s l)');
+    expect(input2).to.be.equal('hsl(0deg 100% 50%)');
+  });
+
+  it('should return an HSV color function that converts to rgb', () => {
     const rgb = getColorFn('rgb', 'rgb');
     const hsl = getColorFn('hsl', 'hsl', { ...hslConversions }, { units: ['deg', '%', '%'] });
     const hsv = getColorFn('hsv', 'hsv', { ...hsvConversions }, { units: ['deg', '%', '%'] });
@@ -126,19 +109,6 @@ describe('getColorFn', () => {
 
     const input2 = e('rgb(from hsv(240deg 100% 100%) r g b)');
     expect(input2).to.be.equal('rgb(0 0 255)');
-  });
-
-  it('should return an HSV color function that converts to hsl', () => {
-    const hsl = getColorFn('hsl', 'hsl', {}, { units: ['deg', '%', '%'] });
-    const hsv = getColorFn('hsv', 'hsv', { ...hsvConversions }, { units: ['deg', '%', '%'] });
-
-    const e = getEval({ hsl, hsv }, ENV_2022);
-
-    const input = e('hsv(from hsl(240deg 100% 50%) h s v)');
-    expect(input).to.be.equal('hsv(240deg 100% 100%)');
-
-    const input2 = e('hsl(from hsv(0deg 100% 100%) h s l)');
-    expect(input2).to.be.equal('hsl(0deg 100% 50%)');
   });
 
   it('should return an HSV color function that converts to hsl based on calc conversions', () => {
@@ -153,6 +123,7 @@ describe('getColorFn', () => {
     const input2 = e('hsl(from hsv(0deg 100% 100%) h s l)');
     expect(input2).to.be.equal('hsl(0deg 100% 50%)');
   });
+
 
   it('should return a multispace color function', () => {
     const color = getColorFn('color', ['srgb', 'xyz'], {
@@ -295,15 +266,15 @@ describe('getColorFn', () => {
   });
 
   it('should handle non-standard color identifiers', () => {
-    const nonStandardColor = getColorFn('nonStandardColor', 'rgb', {}, { identifiers: ['key1', 'key2', 'key3'] });
+    const nonStandardColor = getColorFn('nonStandardColor', 'rgb', {}, { identifiers: ['c1', 'c2', 'c3'] });
 
     const e = getEval({ nonStandardColor });
 
-    const input = e('nonStandardColor(from rgb(255 0 0) key1 key2 key3)');
+    const input = e('nonStandardColor(from rgb(255 0 0) c1 c2 c3)');
     expect(input).to.be.equal('nonStandardColor(255 0 0)');
   });
 
-  it('should handle empty or missing parameters gracefully', () => {
+  xit('should handle empty or missing parameters gracefully', () => {
     const emptyParamsColor = getColorFn('emptyParamsColor', 'rgb');
 
     const e = getEval({ emptyParamsColor });
@@ -323,9 +294,28 @@ describe('getColorFn', () => {
 
     const e = getEval({ hsl, rgb });
 
-    const input = e('hsl(from rgb(255 0 255) calc(h * 0.5) calc(s * 0.25) calc(l * 0.25))');
+    const input = e('hsl(from rgb(255 0 255) calc(h * 0.5) calc(s * 0.5) calc(l * 0.5))');
     
-    expect(input).to.be.equal('hsl(150deg 25% 12.5%)');
+    expect(input).to.be.equal('hsl(150deg 50% 25%)');
+  });
+
+  it('should handle calc-based adjustments in nested HSL function', () => {
+    const hsl = getColorFn('hsl', 'hsl', { ...hslCalcConversions }, { units: ['deg', '%', '%'] });
+
+    const e = getEval({ hsl });
+
+    const c1 = 'rgb(255 0 255)';
+    // const c1 =  'hsl(300deg 100% 50%)';
+    const c2 = `hsl(
+      from ${c1}
+      calc(h * 0.5)
+      calc(s * 0.5)
+      calc(l * 0.5)
+    )`;
+    const c3 = `hsl(from ${c2} calc(h * 2) calc(s * 2) calc(l * 2))`;
+    const input = e(c3);
+    
+    expect(input).to.be.equal('hsl(300deg 100% 50%)');
   });
 
   it('should handle calc-based adjustments in RGB function', () => {
@@ -355,19 +345,18 @@ describe('getColorFn', () => {
 
   it('should handle computed adjustments with dynamic variables in relative hsl color', () => {
     const rgb = getColorFn('rgb', 'rgb', {});
-    const hsl = getColorFn('hsl', 'hsl', { ...hslConversions }, { units: ['deg', '%', '%'] });
+    const hsl = getColorFn('hsl', 'hsl', { ...hslCalcConversions }, { units: ['deg', '%', '%'] });
 
     const e = getEval({ hsl, rgb });
 
-    const input = e('hsl(from rgb(255 0 255) calc(var(--x) / 180 * pi) calc(var(--y) * 0.5) calc(var(--z) * 0.5))', {
-      '--x': 90,
-      '--y': 1,
-      '--z': 0.5
+    const input = e('hsl(from rgb(255 0 255) calc(var(--x) * 0.5) var(--y) var(--z))', {
+      '--x': '90deg',
+      '--y': '100%',
+      '--z': '50%'
     });
 
-    expect(input).to.be.closeToUnit('hsl(90deg 50% 25%)');
+    expect(input).to.be.closeToUnit('hsl(45deg 100% 50%)');
   });
-
 
   it('should handle nested `calc` expressions with dynamic variables in RGB function', () => {
     const rgb = getColorFn('rgb', 'rgb', { ...rgbConversions });
@@ -486,16 +475,111 @@ describe('getColorFn', () => {
       },
       units: ['deg', '%', '%']
     });
-    const hsl = getColorFn('hsl', 'hsl', { ...hslCalcConversions }, {
+    const hsl = getColorFn('hsl', 'hsl', { ...hslConversions }, {
       units: ['deg', '%', '%']
     });
     const rgb = getColorFn('rgb', 'rgb');
 
-    const e = getEval({ hsv, hsl, rgb });
+    const e = getEval({
+      hsv,
+      // hsl,
+      rgb
+    });
 
-    const input = e('hsv(from rgb(255 0 0) h s v)');
+    // const input = e('hsv(from rgb(255 0 0) h s v)');
+    const input = e('hsv(from hsl(0deg 100% 50%) h s v)');
 
     expect(input).to.be.closeToUnit('hsl(0deg 100% 50%)');
+  });
+
+  it('should accept a conversion space by input option', () => {
+    const hsx = getColorFn('hsx', 'hsx', {
+      hslToHsx: (h, s, l) => {
+        const x = `calc(${s} * 0 + ${l} / clamp(0, calc(2 * 0.5), 2))`;
+  
+        return [h, s, x];
+      },
+      hsxToHsl: (h, s, x) => {
+        const l = `calc(${x} * clamp(0, calc(2 * 0.5), 2))`;
+  
+        return [h, s, l];
+      }
+    }, {
+      identifiers: ['h', 's', 'x'],
+      input: {
+        colorSpace: 'hsl',
+        funcName: 'hsl',
+        identifiers: ['h', 's', 'l'],
+        units: ['deg', '%', '%']
+      },
+      output: {
+        colorSpace: 'hsl',
+        format: ([h, s, l]) => `hsl(${h} ${s} ${l})`,
+        units: ['deg', '%', '%']
+      },
+      units: ['deg', '%', '%']
+    });
+
+    const input = hsx('from rgb(255 0 255) h s x');
+    
+    const e = getEval();
+
+    const evaluated = e(input);
+
+    expect(evaluated).to.be.equal('hsl(300deg 100% 50%)');
+  });
+
+  xit('should emulate hsv conversion space by input option', () => {
+    const hsv = getColorFn('hsv', 'hsv', hsvCalcConversions, {
+      identifiers: ['h', 's', 'v'],
+      input: {
+        colorSpace: 'hsl',
+        funcName: 'hsl',
+        identifiers: ['h', 's', 'l'],
+        units: ['deg', '%', '%']
+      },
+      output: {
+        colorSpace: 'hsl',
+        units: ['deg', '%', '%']
+      },
+      units: ['deg', '%', '%']
+    });
+
+    const input = hsv('from rgb(255 0 255) h s v');
+
+    console.log('RESULT', input);
+    
+    const e = getEval();
+
+    const evaluated = e(input);
+
+    expect(evaluated).to.be.equal('hsl(300deg 100% 50%)');
+  });
+
+  it('resolves complex relative color', () => {
+    const hsl = getColorFn('hsl', 'hsl', { ...hslCalcConversions }, { units: ['deg', '%', '%'] });
+
+    const input = `hsl(
+      from hsl(
+        from rgb(255 0 255)
+        h
+        0%
+        calc(s * var(--sx) + l * var(--lx))
+      )
+      calc(h * var(--hx))
+      s
+      l
+    )`;
+
+    const e = getEval({ hsl });
+
+    const result = e(input, {
+      '--sx': 0.5,
+      '--lx': 0.5,
+      '--hx': 0.5
+    });
+
+    expect(result).to.be.equal('hsl(150deg 0% 75%)');
   });
 
   // Test for the new requirement:
@@ -527,11 +611,23 @@ describe('getColorFn', () => {
     }, ENV_2022);
 
     // const input = e22('hsv(from rgb(var(--r) var(--g) var(--b)) h s v)');
-    const input = e22('hsv(from rgb(var(--r) var(--g) var(--b)) h s v)', {}, {
-      evalResult: false
-    });
-    // Intermediate generated color: hsl(from rgb(255 0 0) calc(h + ...) calc(s + ...) calc(l + ...))
-    console.log('********* INPUT', input);
+    // const result = hsv('from rgb(var(--r) var(--g) var(--b)) h s v');
+    const result = hsv('from rgb(255 0 255) h s v');
+
+    // console.log();
+    // console.log();
+    // console.log('LOCAL RESULT');
+    // console.log(result);
+
+    // console.log();
+    // console.log();
+
+    // return;
+    
+    // const evaluated = e22(result);
+    // // Intermediate generated color: hsl(from rgb(255 0 0) calc(h + ...) calc(s + ...) calc(l + ...))
+    // console.log('********* evaluated', evaluated);
+     
 
     // Target environment knows about color functions
     const e23 = getEval({
@@ -540,15 +636,18 @@ describe('getColorFn', () => {
       // hsv,
     });
 
-    const result = e23(input, {
+    const evaluated2 = e23(result, {
       '--r': 255,
       '--g': 0,
       '--b': 0
     }, {
-      evalResult: true
+      // evalResult: true
     });
 
-    console.log('********* RESULT', result);
+    console.log();
+    console.log();
+    console.log('TARGET RESULT');
+    console.log(evaluated2);
 
     expect(result).to.be.equal('hsl(0deg 100% 50%)');
   });

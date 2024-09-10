@@ -1,6 +1,8 @@
 import { CSS } from '../ast/CSS.mjs';
 import { Env } from '../env/Env.mjs';
-import { unwrap } from '../calc/unwrap.mjs';
+// import { unwrap } from '../calc/unwrap.mjs';
+import { unwrap, number } from '../calc/number.mjs';
+import { stripCalc } from '../calc/stripCalc.mjs';
 
 import { valueTransformer } from './transformers/valueTransformer.mjs';
 import toJS from './toJs.mjs';
@@ -11,6 +13,7 @@ import { compute } from '../calc/compute.mjs';
 
 import { ENV_2022, ENV_2023, ENV_2024, ENV_NEXT } from './env.mjs';
 
+
 const OPERATORS = {
   '+': '_add',
   '-': '_subtract',
@@ -18,9 +21,24 @@ const OPERATORS = {
   '/': '_divide',
 };
 
+const isTerm = value =>
+  !!String(value).match( /^\s*(calc\(|\(*\s*-?(\d+[\d.-e]*|var\()([a-z]{2,}|%)*\s*\)*\s*[-+*/])/);
+
 const coreEnv = {
   _undef: (name, ...args) => `${name}(${args.join(', ')})`,
   _join: (delimiter, ...items) => items.join(delimiter),
+  calc: (expression) => {
+    // console.log('CALC: ', expression);
+    // return `calc(${stripCalc(expression)})`;
+    
+    
+    const value = unwrap(expression);
+
+    // console.log('CALC: ', value, expression);
+    
+    // return value !== expression ? value : `calc(${stripCalc(value)})`;
+    return value !== expression ? value : expression;
+  },
   ...Object.fromEntries(
     Object.entries(OPERATORS).map(([op, fn]) => [fn, compute(op)])
   )
@@ -29,11 +47,17 @@ const coreEnv = {
 export const getEval = (customEnv = {}, baseEnv = ENV_2024) => {
   const evalEnv ={ ...coreEnv, ...baseEnv, ...customEnv };
 
-  // console.log('evalEnv:', Object.keys(evalEnv));
+  // Remove undefined or null values
+  Object.keys(evalEnv).forEach(key => {
+    if (evalEnv[key] === undefined || evalEnv[key] === null) {
+      delete evalEnv[key];
+    }
+  });
 
   let e;
 
   e = (input, context = {}, options = {}) => {
+    // console.log('EVAL INPUT: ', input);
     const { evalResult = true } = options;
     // Function handler to wrap the function calls
     const handler = {
@@ -78,6 +102,8 @@ export const getEval = (customEnv = {}, baseEnv = ENV_2024) => {
             operators: OPERATORS,
             validIdentifiers: ['_var', ...Object.keys(evalEnv)]
           });
+
+          // console.log('JS: ', js);
       
           const f = new Function('__context', ...Object.keys(evalEnv), `{
             const _var = (name) => {
@@ -94,9 +120,9 @@ export const getEval = (customEnv = {}, baseEnv = ENV_2024) => {
       
           result = unwrap(result);
       
-          if (Number.isNaN(result) || typeof result === 'undefined') {
-            return typeof input === 'object' ? CSS.stringify(input) : input;
-          }
+          // if (Number.isNaN(result) || typeof result === 'undefined') {
+          //   return typeof input === 'object' ? CSS.stringify(input) : input;
+          // }
 
           return result;
         })
@@ -137,11 +163,10 @@ export const getEval = (customEnv = {}, baseEnv = ENV_2024) => {
     //   return input;
     // }
 
-    
-
     if (typeof result === 'object') {
       throw new Error('Result is an object: ' + JSON.stringify(result));
     }
+
 
     if (!evalResult) {
       return result;
@@ -152,8 +177,6 @@ export const getEval = (customEnv = {}, baseEnv = ENV_2024) => {
     const unresolvedCalc = typeof result === 'string' && result.includes('calc(');
     const unresolvedIdentifiers = typeof result === 'string' && /\s+\w|\w\s+/.test(result);
     const evalAgain = (unresolvedVars || unresolvedCalc) // && !unresolvedIdentifiers;
-
-    // console.log('evalAgain: ', evalAgain);
 
     if (evalAgain) {
       result = e(result, context, { evalResult: false });

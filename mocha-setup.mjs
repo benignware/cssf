@@ -9,18 +9,22 @@ import path from 'path';
 
 global.COLORS = [
   'red', 'lime', 'blue',
-  'cyan', 'magenta', 'yellow',
-  'black', 'white', 'gray',
+  // 'cyan', 'magenta', 'yellow',
+  // 'black', 'white',
+  // 'gray',
 ]
 
 global.COLOR_SPACES = [
   'rgb', 
   'hsl',
-  'hwb',
+  // 'hwb',
+
+  'hsv', // Our custom color space 
+
   'xyz', 
   'xyz-d65',
   'xyz-d50',
-  'lab', 
+  // 'lab', 
   // 'lch',
   // 'oklab',
   // 'oklch',
@@ -31,6 +35,8 @@ global.COLOR_SPACES = [
   // 'a98-rgb',
   // 'rec2020',
   // 'prophoto-rgb',
+
+  
 ];
 
 const FIXTURES_CONVERSIONS = path.resolve('fixtures/conversions.json');

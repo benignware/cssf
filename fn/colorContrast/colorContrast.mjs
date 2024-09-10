@@ -17,7 +17,8 @@ import { gte } from '../gte/gte.mjs';
  * @param {...string} colorList - A list of colors to check against
  * @returns {string} The resulting contrast color
  */
-export function colorContrast(color, ...colorList) {
+export function colorContrast(color, color1, color2) {
+  let colorList = [color1, color2].filter((color) => color);
   const args = parseArgs(`${color}${colorList.length ? ', ': ''}${colorList.join(', ')}`, { tokens: true })
     .filter((arg) => arg !== 'vs');
 

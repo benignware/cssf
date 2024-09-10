@@ -4,18 +4,11 @@ import { camelCase, pascalCase, constantCase, kebabCase } from 'change-case';
 
 import { ColorConverter } from './ColorConverter.mjs';
 
-import * as rgbConversions from './conversions/ref/rgb.mjs';
-import * as hslConversions from './conversions/ref/hsl.mjs';
-import * as hwbConversions from './conversions/ref/hwb.mjs';
-import * as xyzConversions from './conversions/ref/xyz.mjs';
-import * as labConversions from './conversions/ref/lab.mjs';
-import * as lchConversions from './conversions/ref/lch.mjs';
-
 import { refConversions, calcConversions } from './conversions.mjs';
 
 import colorData from '../../fixtures/conversions.json' assert { type: 'json' };
 import ranges from '../../fixtures/ranges.json' assert { type: 'json' };
-import { getEval, ENV_2022 } from '../eval/getEval.mjs';
+import { getEval, ENV_2022, ENV_NEXT } from '../eval/getEval.mjs';
 
 import { toUnit } from '../calc/toUnit.mjs';
 
@@ -26,30 +19,36 @@ const colors = Object.assign({}, ...global.COLORS.map((key) => ({
   [key]: colorData[key],
 })));
 
-const PRECISION = 0.1;
+console.log('COLOR SPACES: ', colorSpaces);
+
+const PRECISION = 0.05;
 // const PRECISION = 0.75;
 
+const conversions = {
+  ...refConversions,
+  ...calcConversions
+}
 
-describe('Color Conversions', () => {
-  const conversions = {
-    ...refConversions,
-    ...calcConversions
-  }
+describe('Color Conversions', function() {
 
-  const e = getEval();
+  console.log('conversions: ', conversions);
+
+  const e = getEval({}, ENV_NEXT);
 
   Object.entries(conversions).forEach(([key, func]) => {
     const [fromSpace, toSpace] = key.split('To').map(part => kebabCase(part).toLowerCase());
     if (!colorSpaces.includes(fromSpace) || !colorSpaces.includes(toSpace)) return;
 
-    describe(`From ${constantCase(fromSpace)} to ${constantCase(toSpace)}`, () => {
+    const conversionKey = `${camelCase(fromSpace)}To${pascalCase(toSpace)}`;
+
+    describe(`From ${constantCase(fromSpace)} to ${constantCase(toSpace)} - ${conversionKey}`, () => {
       Object.entries(colors).forEach(([colorName, values]) => {
         const src = values[fromSpace];
         const dst = values[toSpace];
         if (!src || !dst) return;
 
-        const key = `${camelCase(fromSpace)}To${pascalCase(toSpace)}`;
-        const fn = conversions[key];
+        const fn = conversions[conversionKey];
+    
         if (!fn) return;
 
         const tolerance = toleranceFromRange(ranges[toSpace]);
@@ -63,7 +62,7 @@ describe('Color Conversions', () => {
 
   // Initialize ColorConverter and register conversions
   const colorConverter = new ColorConverter(conversions, {
-    transformer: result => result.map(x => e(`calc(${x})`)),
+    // transformer: result => result.map(x => e(`calc(${x})`)),
   });
 
   colorSpaces.forEach(fromSpace => {
@@ -73,21 +72,28 @@ describe('Color Conversions', () => {
 
         if (!hasConversion) {
           console.warn(`Warn: No conversion from ${fromSpace} to ${toSpace}`);
-          return;
         }
-        const conversionPath = colorConverter.getConversionPath(fromSpace, toSpace);
+        
+        const conversionPath = hasConversion ? colorConverter.getConversionPath(fromSpace, toSpace) : [];
         const intermediateSpaces = conversionPath.slice(1, -1);
 
-        if (intermediateSpaces.length === 0) {
+        if (hasConversion && intermediateSpaces.length === 0) {
+          // We should have tested direct conversions already
           return;
         }
-
-        describe(`From ${constantCase(fromSpace)} to ${constantCase(toSpace)}${conversionPath.length ? ` (${conversionPath.join(' > ')})` : ''}`, () => {
-          Object.entries(colors).forEach(([colorName, values]) => {
-            const src = values[fromSpace];
+  
+        describe(`From ${constantCase(fromSpace)} to ${constantCase(toSpace)}${conversionPath.length ? ` (${conversionPath.join(' > ')})` : ''}`, function() {
+          if (!hasConversion) {
+            // this.skip();
+            return;
+          }
+        
+          Object.entries(colors).forEach(([colorName, values]) => {const src = values[fromSpace];
             const dst = values[toSpace];
 
-            if (!src || !dst) return;
+            if (!src || !dst) {
+              return;
+            }
 
             it(`should convert ${colorName} from ${fromSpace} to ${toSpace} correctly`, () => {
               const converted = colorConverter.convertColor(fromSpace, toSpace, ...src);
@@ -104,20 +110,18 @@ describe('Color Conversions', () => {
 
 describe('Color Function Conversions', () => {
   const colorDef = [
-    ['rgb', 'rgb'],
-    ['hsl', 'hsl', hslConversions, { units: ['deg', '%', '%'] }],
-    ['hwb', 'hwb', hwbConversions, { units: ['deg', '%', '%'] }],
-    ['lab', 'lab', labConversions],
-    ['lch', 'lch', lchConversions],
+    ['rgb', 'rgb', conversions],
+    ['hsl', 'hsl', {}, { units: ['deg', '%', '%'] }],
+    ['hwb', 'hwb', {}, { units: ['deg', '%', '%'] }],
+    ['hsv', 'hsv', {}, { units: ['deg', '%', '%'] }],
+    ['lab', 'lab', {}],
+    ['lch', 'lch', {}],
     ['color', [
       'xyz',
       'xyz-d50',
       'xyz-d65',
       'srgb',
-    ], {
-      ...xyzConversions,
-      ...rgbConversions,
-    }, {
+    ], {}, {
       identifiers: {
         'xyz': 'xyz',
         'xyz-d65': 'xyz',
@@ -133,7 +137,7 @@ describe('Color Function Conversions', () => {
     })
   );
 
-  const e = getEval(colorFn, ENV_2022);
+  const e = getEval(colorFn, ENV_NEXT);
 
   colorSpaces.forEach(fromSpace => {
     colorSpaces.forEach(toSpace => {

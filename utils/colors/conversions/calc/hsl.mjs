@@ -1,19 +1,20 @@
-import ifelse from '../../../../lib/ifelse/ifelse.mjs';
-import abs from '../../../../lib/abs/abs.mjs';
-import gte from '../../../../lib/gte/gte.mjs';
-import lt from '../../../../lib/lt/lt.mjs';
-import and from '../../../../lib/and/and.mjs';
-import eq from '../../../../lib/eq/eq.mjs';
-import mod from '../../../../lib/mod/mod.mjs';
-import round from '../../../../lib/round/round.mjs';
+import { ifelse } from "../../../../fn/ifelse/ifelse.mjs";
+import { abs } from "../../../../fn/abs/abs.mjs";
+import { round } from "../../../../fn/round/round.mjs";
+import { mod } from "../../../../fn/mod/mod.mjs";
+import { gte } from "../../../../fn/gte/gte.mjs";
+import { lt } from "../../../../fn/lt/lt.mjs";
+import { and } from "../../../../fn/and/and.mjs";
+import { eq } from "../../../../fn/eq/eq.mjs";
 
 export const hslToRgb = (h, s, l) => {
   const C = `(1 - ${abs(`2 * ${l} - 1`)}) * ${s}`;
-  const X = `${C} * (1 - ${abs(
+  
+  let X = `${C} * (1 - ${abs(
     `mod(${h} / 60, 2) - 1`
   )})`;
 
-  // const X = `${C} * (1 - ${abs(
+  // X = `${C} * (1 - ${abs(
   //   mod(`(${h} / 60)`, 2) - 1
   // )})`;
 
@@ -79,9 +80,10 @@ export const rgbToHsl = (r, g, b) => {
   // const h = `mod(${hRaw} * 60, 360)`;
   // let h = `mod(((${hRaw} * 60) + 360), 360)`;
   // let h = mod(`((${hRaw} * 60) + 360)`, 360);
-  let h = mod(`((${hRaw}) * 60) + 360`, 360);
 
-  h = `mod((${hRaw}) * 60 + 360, 360)`;
+  // let h = mod(`((${hRaw}) * 60) + 360`, 360);
+
+  let h = `mod((${hRaw}) * 60 + 360, 360)`;
 
   // h = round(h);
   // h = `clamp(${h}, 0, 360)`;
@@ -90,3 +92,30 @@ export const rgbToHsl = (r, g, b) => {
 
   return [ h, s, l ];
 };
+
+// export const hslToHwb = (h, s, v) => {
+//   // Convert HSL to HWB
+//   const W = `max(0, ${v} - ${s})`;
+//   const B = `1 - ${v}`;
+
+//   return [ h, W, B ];
+// };
+
+// export const hwbToHsv = (h, W, B) => {
+//   // Convert HWB to HSL
+//   const v = `1 - ${B}`;
+//   const s = `1 - ${W} / ${v}`;
+
+//   return [ h, s, v ];
+// }
+
+// export const hsvToHwb = (h, s, v) => {
+//   // Convert HSV to HSL
+//   const l = `(2 - ${s}) * ${v} / 2`;
+//   // const S = `(${v} === 0) ? 0 : 2 * (1 - ${l} / ${v})`;
+
+//   const c = eq(v, 0);
+//   const S = ifelse(c, 0, `2 * (1 - ${l} / ${v})`);
+
+//   return [ h, S, l ];
+// }

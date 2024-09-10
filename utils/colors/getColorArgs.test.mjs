@@ -9,7 +9,6 @@ describe('getColorArgs', () => {
     expect(getColorArgs('1 0 0 / 1')).to.deep.equal({ c1: 1, c2: 0, c3: 0, a: 1 });
   });
 
-
   it('should extract arguments from an absolute color in legacy syntax', () => {
     expect(getColorArgs('255, 0, 0, 0.5')).to.deep.equal({ c1: 255, c2: 0, c3: 0, a: 0.5 });
   });
@@ -71,7 +70,25 @@ describe('getColorArgs', () => {
     });
   });
 
-  return;
+  it('should extract identifiers in a relative color', () => {
+    expect(getColorArgs('from rgb(255 0 0) r g b / a')).to.deep.equal({
+      from: 'rgb(255 0 0)',
+      c1: 'r',
+      c2: 'g',
+      c3: 'b',
+      a: 'a', 
+    });
+  });
+
+  it('should extract non-standard identifiers in a relative color', () => {
+    expect(getColorArgs('from rgb(255 0 0) c1 c2 c3 / cA')).to.deep.equal({
+      from: 'rgb(255 0 0)',
+      c1: 'c1',
+      c2: 'c2',
+      c3: 'c3',
+      a: 'cA', 
+    });
+  });
 
   it('should extract arguments with a relative hsl color', () => {
     expect(getColorArgs('from hsl(240deg 100% 50%) h s l / a')).to.deep.equal({
@@ -91,11 +108,21 @@ describe('getColorArgs', () => {
     });
   });
 
-  return;
-
   it('should correctly extract origin color with variables', () => {
     expect(getColorArgs('from rgba(var(--r) var(--g) var(--b)) 1 0 0 / 1')).to.deep.equal({
       from: 'rgba(var(--r) var(--g) var(--b))',
+      c1: 1,
+      c2: 0,
+      c3: 0,
+      a: 1, 
+    });
+  });
+
+  it('should correctly extract origin color with computed values', () => {
+    expect(
+      getColorArgs('from rgba(calc(var(--r) * 0.5) calc(0.5 * var(--g)) calc(var(--b) * 0.5) / 0.5) 1 0 0 / 1')
+    ).to.deep.equal({
+      from: 'rgba(calc(var(--r) * 0.5) calc(0.5 * var(--g)) calc(var(--b) * 0.5) / 0.5)',
       c1: 1,
       c2: 0,
       c3: 0,

@@ -104,6 +104,7 @@ export function closeToUnit(_chai, utils) {
 
     // Helper function to check unit and value closeness
     const checkValue = (actual, expected, precision) => {
+      // console.log('CHECK VALUE: ', actual, expected, precision);
       let actualValue = actual.value;
       let actualUnit = actual.unit || 'rad'; // Default to radians if no unit is given
 
@@ -147,6 +148,8 @@ export function closeToUnit(_chai, utils) {
         expectedValue = normalizeRadians(expectedValue);
       }
 
+      // console.log('actual: ', actualValue, actualUnit, 'expected: ', expectedValue, expectedUnit);
+
       // Check the numeric closeness
       if (typeof precision !== 'number' || precision <= 0) {
         throw new Error('Precision must be a positive number');
@@ -159,6 +162,7 @@ export function closeToUnit(_chai, utils) {
       const adjustedDelta = Math.min(delta, Math.abs((2 * Math.PI) - delta));
 
       // Check if the actual value is within the tolerance range of the expected value
+      // console.log('actualValue: ', actualValue, 'expectedValue: ', expectedValue, 'tolerance: ', tolerance);
       new Assertion(adjustedDelta <= tolerance, `Expected value to be within ${tolerance} of ${expectedValue}, but got ${actualValue}`).to.be.true;
     };
 

@@ -37,3 +37,24 @@ export const replaceIdentifiers = (input, identifiers) => {
 
   return input;
 }
+
+export const hasIdentifiers = (input, identifiers = []) => {
+  if (typeof input !== 'string') {
+    return false;
+  }
+
+  const ast = input.node ? input : CSS.parse(input);
+  let has = false;
+  const visitor = {
+    visit: 'Identifier',
+    enter: (node) => {
+      if (identifiers.includes(node.name)) {
+        has = true;
+      }
+    }
+  };
+
+  csstree.walk(ast, visitor);
+
+  return has;
+}

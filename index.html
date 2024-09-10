@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCSS to CSS Conversion</title>
+    <style>
+        /* Default styling if SCSS file is not available or fails to load */
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          padding: 20px;
+        }
+
+        .test {
+          color: hsl(240deg calc((((0) * ((calc((1 - (clamp(0, (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2) - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2))) / 1e-14, 1))))))) + (((((0) * ((1 - (calc((1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - ((2 - (1)) * (1) / 2)) / 1e-14, 1))))))) * (1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 1) / 1e-14, 1))) * (1 - (clamp(0, ((1) - ((2 - (1)) * (1) / 2)) / 1e-14, 1)))))))))))) + (((1 - (2 - (1)) * (1) / 2) / min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2)) * (1 - ((1 - (calc((1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - ((2 - (1)) * (1) / 2)) / 1e-14, 1))))))) * (1 - ((calc((1 - (clamp(0, ((2 - (1)) * (1) / 2 - 1) / 1e-14, 1))) * (1 - (clamp(0, ((1) - ((2 - (1)) * (1) / 2)) / 1e-14, 1))))))))))))))) * (1 - ((calc((1 - (clamp(0, (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2) - 0) / 1e-14, 1))) * (1 - (clamp(0, ((0) - (min((2 - (1)) * (1) / 2, 1 - (2 - (1)) * (1) / 2))) / 1e-14, 1)))))))))) calc((2 - (1)) * (1) / 2));
+        }
+    </style>
+</head>
+<body>
+    <h1>CSSF Example</h1>
+    <script type="importmap">
+        {
+          "imports": {
+            "css-tree": "https://jspm.dev/css-tree",
+            "change-case": "https://jspm.dev/change-case",
+            "lodash.memoize": "https://jspm.dev/lodash.memoize",
+            "cssf": "./index.mjs"
+          }
+        }
+    </script>
+    <script type="module">
+      import cssf from 'cssf';
+
+      const INPUT = './index.css'; // The SCSS file to fetch and compile
+
+      const main = async () => {
+        console.log('Fetching CSS file', INPUT);
+        // Fetch the css file
+        const response = await fetch(INPUT);
+        const data = await response.text();
+        console.log('COMPILING CSS', data);
+        // Compile
+        const css = cssf(data);
+
+        console.log('AFTER CSS', css);
+
+        // Create a style element and append the compiled CSS
+        const style = document.createElement('style');
+        style.innerHTML = css;
+        document.head.appendChild(style);
+      };
+
+      main();
+
+    </script>
+</body>
+</html>

@@ -1,8 +1,6 @@
 // xyz.mjs
-import { clamp, matrixMultiply } from './utils.mjs';
+import { matrixMultiply } from './utils.mjs';
 import { rgbLinearToRgb, rgbToRgbLinear } from './rgb.mjs';
-
-
 
 // White Point Conversion
 const XyzD65ToXyzD50Matrix = [
@@ -16,13 +14,6 @@ const XyzD50ToXyzD65Matrix = [
   [-0.0282895, 1.0099416, 0.0210077],
   [0.0122982, -0.0204830, 1.3299098]
 ];
-
-// Function to apply gamma correction for RGB values
-const gammaCorrect = (value) => {
-  return value <= 0.0031308
-    ? 12.92 * value
-    : 1.055 * Math.pow(value, 1 / 2.4) - 0.055;
-};
 
 // Matrix for converting from XYZ to linear RGB
 const XyzToRgbLinearMatrix = [
@@ -53,6 +44,13 @@ export const rgbToXyz = (r, g, b) => {
   const [rLinear, gLinear, bLinear] = rgbToRgbLinear(r, g, b);
   return matrixMultiply(RgbToXyzMatrix, [rLinear, gLinear, bLinear]);
 };
+export const xyzToRgb = (x, y, z) => {
+  const [rLinear, gLinear, bLinear] = matrixMultiply(XyzToRgbLinearMatrix, [x, y, z]);
+  const [r, g, b] = rgbLinearToRgb(rLinear, gLinear, bLinear);
+
+  return [Math.round(r), Math.round(g), Math.round(b)];
+};
+
 
 // Convert XYZ to RGB
 // export const xyzToRgb = (x, y, z) => {
@@ -84,13 +82,3 @@ export const xyzToXyzD65 = (x, y, z) => [x, y, z];
 export const xyzD65ToXyz = (x, y, z) => [x, y, z];
 
 
-export const xyzToRgb = (x, y, z) => {
-  const [rLinear, gLinear, bLinear] = matrixMultiply(XyzToRgbLinearMatrix, [x, y, z]);
-
-  // Apply gamma correction and clamp the values to [0, 255]
-  const r = clamp(gammaCorrect(rLinear), 0, 1) * 255;
-  const g = clamp(gammaCorrect(gLinear), 0, 1) * 255;
-  const b = clamp(gammaCorrect(bLinear), 0, 1) * 255;
-
-  return [Math.round(r), Math.round(g), Math.round(b)];
-};

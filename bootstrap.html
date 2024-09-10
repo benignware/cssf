@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="importmap">
+      {
+        "imports": {
+          "sass": "https://jspm.dev/sass",
+          "css-tree": "https://jspm.dev/css-tree",
+          "change-case": "https://jspm.dev/change-case",
+          "lodash.memoize": "https://jspm.dev/lodash.memoize",
+          "cssf": "./index.mjs",
+          "cssf/peer/sass": "./peer/sass.mjs"
+        }
+      }
+  </script>
+    <title>SCSS to CSS Conversion</title>
+    <style>
+      :root {
+        --bs-primary: #00ffd0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bootstrap</h1>
+
+    <button class="btn btn-primary">Primary</button>
+    <script type="module">
+      import * as sass from 'sass';
+      import scssf from 'cssf/peer/sass';
+
+      const NODE_MODULES = 'https://cdn.skypack.dev';
+
+      const myImporter = {
+        load: async (url, options) => {
+          console.log('IMPORTING', url.href);
+          if (url.href.startsWith(NODE_MODULES)) {
+            
+            const response = await fetch(url.href);        
+            const text = await response.text();
+            
+            return {
+              contents: text,
+              syntax: 'css'
+            }
+          }
+          return null;
+        },
+        canonicalize: (str, options) => {
+          if (str.startsWith('~')) {
+            console.log('CANONICALIZING', new URL(NODE_MODULES + str.slice(1)));
+            return new URL(NODE_MODULES + str.slice(1));
+          }
+
+          // if (str.indexOf('node_modules/bulma') > -1) {
+          //   return new URL('../modified-path-to-bulma', 'https://cdn.skypack.dev');
+          // }
+          return null;
+        }
+      };
+
+      const main = async () => {
+        const entry = './index.scss'; // The SCSS file to fetch and compile
+
+        console.log('Fetching SCSS file', entry, scssf.env);
+        // Fetch the scss file
+        const response = await fetch(entry);
+        const input = await response.text();
+        // Compile
+        const result = await sass.compileStringAsync(
+          input,
+          {
+            functions: { ...scssf.env },
+            importer: myImporter,
+            // includePaths: ['node_modules'],
+            // outputStyle: 'compressed',
+          }
+        );
+
+        console.log('AFTER CSS', result.css);
+
+        // Create a style element and append the compiled CSS
+        const style = document.createElement('style');
+        style.innerHTML = result.css;
+        document.head.appendChild(style);
+      };
+
+      main();
+    </script>
+  </body>
+</html>

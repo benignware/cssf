@@ -1,6 +1,6 @@
 // import { isNumber, number, parseArgs } from '../../lib/utils.mjs';
 import { isNumber, number, unit } from '../calc/number.mjs';
-import { parseArgs } from '../ast/parseArgs.mjs';
+import { getArgs } from '../ast/getArgs.mjs';
 import { isColorKey } from './keyToRgb.mjs';
 
 class ColorArgs {
@@ -28,7 +28,7 @@ class ColorArgs {
 export const getColorArgs = (from = null, colorSpace = null, ...args) => {
   const input = [from, colorSpace, ...args].join(' ');
   
-  args = parseArgs(input, { tokens: true });
+  args = getArgs(input, { tokens: ['/'] });
 
   const fromIndex = args.findIndex((arg, index, array) => {
     return arg.startsWith('from') && arg.length > 4 || index > 0 &&  array[index - 1] === 'from';
