@@ -24,4 +24,8 @@ describe('eq', () => {
   it('returns 1 if a equals b', () => {
     expect(e(`calc(${eq('1', '1')}`)).to.equal(1);
   });
+
+  it('handles zero', () => {
+    expect(e(`calc(${eq('0', '0')}`)).to.equal(1);
+  });
 });

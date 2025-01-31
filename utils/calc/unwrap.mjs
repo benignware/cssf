@@ -1,37 +1,44 @@
 import { isNumber, number, unit } from './number.mjs';
-import { stripCalc } from './stripCalc.mjs';
 
-export const unwrap = (input) => {
-  if (typeof input !== 'string') {
-    return input;
+function canTrimParentheses(expr) {
+  if (expr[0] !== '(' || expr[expr.length - 1] !== ')') return false;
+  let depth = 0;
+  for (let i = 0; i < expr.length; i++) {
+      if (expr[i] === '(') depth++;
+      if (expr[i] === ')') depth--;
+      if (depth === 0 && i < expr.length - 1) return false;
   }
-
-  let unwrapped = stripCalc(input);
-
-  console.log('UNWRAPPED:', unwrapped);
-
-  unwrapped = unwrapped.replace(/^\((.*)\)$/, '$1');
-
-  if (!isNaN(Number(unwrapped))) {
-    return Number(unwrapped);
-  }
-
-  const n = number(unwrapped);
-
-  if (!isNaN(n)) {
-    console.log('IS NUMBER', n);
-    return unwrapped;
-  }
-
-  unwrapped = `(${unwrapped})`;
-
-  return unwrapped;
+  return depth === 0;
 }
 
-export const wrap = (input) => {
-  if (typeof input === 'string') {
-    return input;
+export function unwrap(expression) {
+  if (typeof expression !== 'string') {
+    return expression;
   }
 
-  return `(${input})`;
+  if (expression.startsWith('calc(') && expression.endsWith(')')) {
+      expression = expression.slice(5, -1);
+  }
+  
+  while (canTrimParentheses(expression)) {
+      expression = expression.slice(1, -1);
+  }
+
+  const n = number(expression);
+  
+  if (!isNaN(n)) {
+    const u = unit(expression);
+
+    if (u) {
+      return `${n}${u}`;
+    }
+    
+    return n;
+  }
+  
+  return expression;
+}
+
+export function wrap(expression) {
+  return `calc(${unwrap(expression)} )`;
 }

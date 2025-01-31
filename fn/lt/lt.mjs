@@ -8,12 +8,15 @@ import { stripCalc } from '../../utils/calc/stripCalc.mjs';
  */
 export function lt(a, b) {
   const l = 0.00000000000001;
+  const epsilon = 1e-20;
 
   a = stripCalc(a);
   b = stripCalc(b);
 
   const v = `((${b}) - (${a}))`;
-  const s = `clamp(0, ${v} / ${l}, 1)`;
+  const s = `clamp(0, ${v} / ${epsilon}, 1)`;
+  // const s = `${v} / ${l}`;
+  // return 1;
 
   return s;
 }

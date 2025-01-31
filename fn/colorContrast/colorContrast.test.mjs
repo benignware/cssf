@@ -1,8 +1,10 @@
 import { expect } from 'chai';
 import { runInBrowser } from '../../setup/runInBrowser.mjs';
+import { cssEquivalent } from '../../setup/assert/cssEquivalent.mjs';
 import { colorContrast } from './colorContrast.mjs';
 import { getEval } from '../../utils/eval/getEval.mjs';
 import { getRender } from '../../utils/render/getRender.mjs';
+import { convertToColorSyntax } from '../../utils/colors/legacyColors.mjs';
 
 const e = getEval();
 
@@ -18,13 +20,39 @@ describe('colorContrast', () => {
     expect(e(actual)).to.equal(expected);
   });
 
-  xit('computes dark contrast color', () => {
+  it('computes dark contrast color', () => {
     const rgb = 'rgb(250, 240, 240)';
     const actual = colorContrast(rgb, '#fff', '#000');
 
     const expected = 'rgb(0 0 0)';
 
     expect(e(actual)).to.equal(expected);
+  });
+
+  it('computes light contrast color with legacy vars', () => {
+    const rgb = 'rgb(var(--primary-r), var(--primary-g), var(--primary-b))';
+    const actual = colorContrast(rgb, '#fff', '#000');
+
+    const expected = 'rgb(255 255 255)';
+
+    expect(e(actual, {
+      '--primary-r': 5,
+      '--primary-g': 5,
+      '--primary-b': 5,
+    })).to.equal(expected);
+  });
+
+  it('computes dark contrast color wsith legacy vars', () => {
+    const rgb = 'rgb(var(--primary-r), var(--primary-g), var(--primary-b))';
+    const actual = colorContrast(rgb, '#fff', '#000');
+
+    const expected = 'rgb(0 0 0)';
+
+    expect(e(actual, {
+      '--primary-r': 250,
+      '--primary-g': 240,
+      '--primary-b': 240,
+    })).to.equal(expected);
   });
 
   it('should compute dark contrast color in browser', async () => {
@@ -37,27 +65,52 @@ describe('colorContrast', () => {
       <div class="example"></div>
     `;
 
-    const computedWidth = await runInBrowser(htmlContent, () =>
+    const computedColor = await runInBrowser(htmlContent, () =>
       window.getComputedStyle(document.querySelector('.example')).color);
 
-    expect(computedWidth).to.equal('color(srgb 0 0 0)');
+    expect(convertToColorSyntax(computedColor)).to.be.cssEquivalent('color(srgb 0 0 0)');
   }, 30000);
 
   it('should compute light contrast color in browser', async () => {
     const htmlContent = `
       <style>${render(`
         .example {
-          color: ${render(colorContrast('rgb(10 5 10)'))};
+          color: ${render(colorContrast('rgb(10, 5, 10)'))};
         }
       `)}</style>
       <div class="example"></div>
     `;
 
-    const computedWidth = await runInBrowser(htmlContent, () =>
+    const computedColor = await runInBrowser(htmlContent, () =>
       window.getComputedStyle(document.querySelector('.example')).color);
 
-    expect(computedWidth).to.equal('color(srgb 1 1 1)');
+    expect(convertToColorSyntax(computedColor)).to.be.cssEquivalent('color(srgb 1 1 1)');
   }, 30000);
+
+  // Since the color-contrast function is based on a browser hack which is not emulated yet, we skip the following tests
+  xit('computes dynamic light contrast color', () => {
+    const rgb = 'var(--primary)'
+    const actual = colorContrast(rgb, '#fff', '#000');
+
+    const expected = 'rgb(255 255 255)';
+
+    expect(e(actual, {
+      '--primary': 'rgb(5, 5, 5)',
+    })).to.equal(expected);
+  });
+
+  xit('computes dynamic dark contrast color', () => {
+    const rgb = 'var(--primary)'
+    const actual = colorContrast(rgb, '#fff', '#000');
+
+    const expected = 'rgb(0 0 0)';
+
+    expect(e(actual, {
+      '--primary': 'rgb(250, 240, 240)',
+    })).to.equal(expected);
+  });
+
+  return;
 
   // it('computes dark contrast color', () => {
   //   const rgb = 'rgba(191.25, 191.25, 191.25, 1)';

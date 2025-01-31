@@ -16,8 +16,6 @@ export function hypot(...values) {
     return `(${acc}) + (${pow(stripCalc(value), 2)})`;
   }, 0);
 
-  console.log('VALUE', result, sqrt(result));
-
   return sqrt(result);
 }
 

@@ -115,7 +115,7 @@ export const operatorTransformer = (options = {}) => (ast) => {
 
           children.appendData({
             type: 'WhiteSpace',
-            value: ' ',
+            value: '',
           });
           
           let next = item.next;

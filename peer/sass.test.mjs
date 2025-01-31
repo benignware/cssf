@@ -28,7 +28,6 @@ describe('getSassTag', function() {
 
   it('should render scss with default env', function() {
     const scssf = getSassTag();
-
     const input = scssf`
       .example {
         color: hsv(0, 100%, 100%);
@@ -38,6 +37,31 @@ describe('getSassTag', function() {
     const expectedOutput = `
       .example {
         color: hsl(0deg 100% 50%);
+      }
+    `;
+    const e = getEval();
+
+    expect(e(input)).to.be.cssEquivalent(expectedOutput);
+  });
+
+  it('applies plugin', function() {
+    const scssf = getSassTag();
+
+    scssf.use(new class {
+      _call(str) {
+        return 'TEST';
+      }
+    });
+
+    const input = scssf`
+      .example {
+        color: hsv(0, 100%, 100%);
+      }
+    `;
+
+    const expectedOutput = `
+      .example {
+        color: TEST;
       }
     `;
     const e = getEval();

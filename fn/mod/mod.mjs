@@ -10,7 +10,6 @@ import { round } from '../round/round.mjs';
  * @returns {string} A css expression representing modulus of given numbers
  */
 export function mod(a, b) {
-  // console.log('mod', a, b);
   a = stripCalc(a);
   b = stripCalc(b);
 

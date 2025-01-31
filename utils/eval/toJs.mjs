@@ -5,8 +5,7 @@ import { calcTransformer } from "./transformers/calcTransformer.mjs";
 
 import { CSS } from '../ast/CSS.mjs';
 // import { unwrap } from "../calc/unwrap.mjs";
-import { unwrap } from "../calc/number.mjs";
-
+// import { unwrap } from "../calc/number.mjs";
 
 export const toJS = (input, options = {}) => {
   let {
@@ -16,7 +15,11 @@ export const toJS = (input, options = {}) => {
       '*': '_multiply',
       '/': '_divide',
     },
-    validIdentifiers = [],
+    validIdentifiers = [
+      'calc',
+      '_join',
+      // '_var',
+    ],
   } = options;
 
   validIdentifiers.push(...Object.values(operators));
@@ -40,12 +43,12 @@ export const toJS = (input, options = {}) => {
     operatorTransformer({
       operators,
     }),
-    // calcTransformer(),
     literalTransformer({
       validIdentifiers,
       undef: '_undef',
     }),
     argumentTransformer(),
+    calcTransformer(),
   ];
 
   let output = CSS.stringify(
@@ -61,9 +64,6 @@ export const toJS = (input, options = {}) => {
       ast
     )
   );
-
-
-  output = unwrap(output);
 
   return output;
 }

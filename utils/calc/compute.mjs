@@ -1,19 +1,29 @@
-import { isNumber, number, unit, unwrap } from './number.mjs';
+import { isNumber, number, unit } from './number.mjs';
 import { stripCalc } from './stripCalc.mjs';
+import { unwrap } from './unwrap.mjs';
+import { isVar } from './vars.mjs';
 
 const isTerm = value =>
-  !!String(value).match( /^\s*(calc\(|\(*\s*-?(\d+[\d.-e]*|var\()([a-z]{2,}|%)*\s*\)*\s*[-+*/])/);
+  !!String(value).match( /^\s*(\(|\(*\s*-?(\d+[\d.-e]*|var\()([a-z]{2,}|%)*\s*\)*\s*[-+*/])/);
+
+const isFn = value =>
+  !!String(value).match(/^\s*[-\d\w]+\(/);
 
 export const compute = operator => {
   const fn = (a, b) => {
-    // console.log('COMPUTE', a, operator, b);
-    // let as = unwrap(a);
-    // let bs = unwrap(b);
+    // console.log('COMPUTE: ', a, operator, b);
     let as = stripCalc(a);
     let bs = stripCalc(b);
+    // let as = a;
+    // let bs = b;
 
-    if (!isNaN(number(as)) && !isNaN(number(bs))) {
-      // console.log('AS', as, 'BS', bs);
+    //  as = unwrap(a);
+    //  bs = unwrap(b);
+
+    const an = number(as);
+    const bn = number(bs);
+
+    if (!isNaN(an) && !isNaN(bn)) {
       const av = number(as);
       const bv = number(bs);
       const au = unit(a);
@@ -21,6 +31,15 @@ export const compute = operator => {
 
       if (au === bu || !au || !bu) {
         let result = new Function('a', 'b', `return (a) ${operator} (b);`)(av, bv);
+
+        if (result === Number.POSITIVE_INFINITY) {
+          result = 1e-14;
+        }
+
+        if (result === Number.NEGATIVE_INFINITY) {
+          result = -1e-14;
+        }
+
         let u = au || bu;
 
         if ((operator === '*' && au === bu && (av === 0 || bv === 0)) || 
@@ -28,7 +47,9 @@ export const compute = operator => {
           u = '';
         }
 
-        return `${result}${u}`;
+        const ret = u ? `${result}${u}` : result;
+
+        return ret;
       }
     }
 
@@ -38,16 +59,58 @@ export const compute = operator => {
     //   return `${a}${b}`;
     // }
 
-    return `calc(${as} ${operator} ${bs})`;
+    const af = !isNaN(an) ? an : isFn(as) ? as : `(${as})`;
+    const bf = !isNaN(bn) ? bn : isFn(bs) ? bs : `(${bs})`;
+
+    // if (operator === '+' || operator === '-') {
+    //   return `((${as} ${operator} ${bs}))`;
+    // }
+
+    return `${a} ${operator} ${b}`;
+
+    // const aw = wrap(as);
+    // const bw = wrap(bs);
     return `${as} ${operator} ${bs}`;
+
+    return `calc(${as} ${operator} ${bs})`;
+    return `(${as} ${operator} ${bs})`;
 
     return `calc(${(isTerm(as) ? `(${as})` : as)} ${operator} ${(isTerm(bs) ? `(${bs})` : bs)})`;
   };
 
   return (...values) => {
-    values = values.filter(v => v !== undefined);
+    const hasCalc = values.some(v => String(v).includes('calc('));
+    
+    // values = values.map(v => {
+    //   return typeof v === 'string' ? unwrap(v) : v;
+    // });
+    
+    // values = values.filter(v => v !== undefined);
 
-    return values.length ? values.reduce(fn) : '';
+    let result = values.length ? values.reduce(fn) : '';
+
+    if (typeof result === 'number') {
+      return result;
+    }
+
+    const r = unwrap(result);
+    const n = number(r);
+    
+    if (!isNaN(n)) {
+      const u = unit(r);
+      
+      return u ? `${n}${u}` : n;
+    }
+
+    // if (hasCalc) {
+    //   result = `calc(${result})`;
+    // } else {
+      if (operator === '+' || operator === '-') {
+        result = `(${result})`;
+      }
+    // }
+
+    return result;
   };
 };
 

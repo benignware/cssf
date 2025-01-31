@@ -4,6 +4,103 @@ import { getEval, ENV_2022, ENV_2023, ENV_2024, ENV_NEXT } from './getEval.mjs';
 import { Env } from '../env/Env.mjs';
 
 describe('Evaluation Tests', () => {
+  it('should preserve arithmetic parentheses if expression cannot be resolved', function() {
+    const e = getEval();
+    const input = `calc( (var(--x) + 10) / 2 )`
+    const expectedOutput = 7.5; // Adjust based on actual transformation logic
+    const prepared = e(input);
+    expect(prepared).to.be.cssEquivalent(input);
+    expect(e(prepared, {
+      '--x': 5,
+    })).to.equal(expectedOutput);
+  });
+  
+  // it('should resolve args', function() {
+  //   const e = getEval();
+  //   const input = 'rgba(calc(var(--p-r) + 20) 0 0 / 0)';
+  //   const expectedOutput = 'rgba(120 0 0 / 0)'; // Adjust based on actual transformation logic
+  //   const result = e(input, {
+  //     '--p-r': 100,
+  //   });
+  //   expect(result).to.equal(expectedOutput);
+  // });
+
+  it('should compute operations with negative dimension values', function() {
+    const e = getEval();
+    // const input = `calc(((0 / 255) - (0 / 255)) / (max((0 / 255), (0 / 255), (0 / 255)) - min((0 / 255), (0 / 255), (0 / 255))))`;
+    // const input = `calc(
+    //   max(1, 2, 3) - min(1, 2, 3)
+    // )`;
+    // const input = `
+    //   calc(
+        // (
+        //   (0 / 255) - (0 / 255)
+        // ) / (
+    //       max(
+    //         (0 / 255),
+    //         (0 / 255),
+    //         (0 / 255)
+    //       ) - min(
+    //         (0 / 255),
+    //         (0 / 255),
+    //         (0 / 255)
+    //       )
+    //     )
+    //   )
+    // `
+    // const input = `calc((0 / 255) - (0 / 255))`;
+    const input = `calc(
+     (
+        (0 / 255) - (0 / 255)
+      ) / (
+        max(
+          (0 / 255),
+          (0 / 255),
+          (0 / 255)
+        ) - min(
+          (0 / 255),
+          (0 / 255),
+          (0 / 255)
+        )
+      )
+    )`;
+    
+    // const expectedOutput = Number.NaN; // Adjust based on actual transformation logic
+    const result = e(input);
+    expect(result).to.be.NaN;
+  });
+
+  xit('should resolve args', function() {
+    const e = getEval();
+    const input = 'rgba(from blue r g b / 0)';
+    const expectedOutput = 'rgba(120 0 0 / 0)'; // Adjust based on actual transformation logic
+    const result = e(input, {
+      '--p-r': 100,
+    });
+    expect(result).to.equal(expectedOutput);
+  });
+
+  
+  it('should compute operations with negative dimension values', function() {
+    const e = getEval();
+    const value = '-314px';
+    const input = `calc(2px * -4px)`;
+    
+    const expectedOutput = '-8px'; // Adjust based on actual transformation logic
+    const result = e(input);
+    expect(result).to.equal(expectedOutput);
+  });
+
+  it('should compute complex expression', function() {
+    const e = getEval();
+    const input = `calc(max(-342px, -1 * (-342px)))`
+    
+    const expectedOutput = '342px'; // Adjust based on actual transformation logic
+    const result = e(input);
+    expect(result).to.equal(expectedOutput);
+  });
+
+
   it('should evaluate addition inside calc', () => {
     const e = getEval();
     const result = e('calc(3 + 4)');
@@ -28,12 +125,6 @@ describe('Evaluation Tests', () => {
     expect(result).to.equal(3);
   });
 
-  it("should not evaluate expressions that can't be resolved", () => {
-    const e = getEval();
-    const result = e('calc(l + 4)');
-    expect(result).to.equal('calc(l + 4)');
-  });
-
   it('evaluates unit expression', () => {
     const e = getEval();
     assert.strictEqual(e('10px'), '10px');
@@ -42,6 +133,19 @@ describe('Evaluation Tests', () => {
   it('evaluates calc expression', () => {
     const e = getEval();
     assert.strictEqual(e('calc(10px * 2)'), '20px');
+  });
+
+  it("should not evaluate expressions that can't be resolved", () => {
+    const e = getEval();
+    const result = e('calc(l + 4)');
+    expect(result).to.equal('calc(l + 4)');
+  });
+
+  it('should only wrap expression with calc', () => {
+    const e = getEval();
+    const input = 'abc(var(--h), var(--s), var(--l))';
+    const result = e(input);
+    expect(result).to.equal(input);
   });
 
   it('evaluates addition with units', () => {
@@ -76,6 +180,13 @@ describe('Evaluation Tests', () => {
     ), 9);
   });
 
+  it('evaluates dynamic expression with fallback', () => {
+    const e = getEval();
+    assert.strictEqual(e(
+      'calc((var(--a, 1) + var(--b, 2)) * var(--c, 3))',
+    ), 9);
+  });
+
   it('evaluates constants', () => {
     const e = getEval();
     assert.strictEqual(e('pi'), Math.PI);
@@ -106,18 +217,25 @@ describe('Evaluation Tests', () => {
     assert.strictEqual(e('xyz(0, 0, 0)'), 'xyz(0, 0, 0)');
   });
 
-  it('splits consecutive arguments', () => {
-    const abc = (...args) => `abc(${args.join(', ')})`;
-    const e = getEval({ abc });
-
-    assert.strictEqual(e('abc(calc(10px + 1px)10px'), 'abc(11px 10px)');
-  });
-
   it('handles space-separated arguments', () => {
     const abc = (...args) => `abc(${args.join(', ')})`;
     const e = getEval({ abc });
 
     assert.strictEqual(e('abc(10 0 0)'), 'abc(10 0 0)');
+  });
+
+  it('executes calc inside ', () => {
+    const abc = (...args) => `abc(${args.join(', ')})`;
+    const e = getEval({ abc });
+
+    assert.strictEqual(e('abc(calc(10px + 1px))'), 'abc(11px)');
+  });
+
+  it('splits consecutive arguments', () => {
+    const abc = (...args) => `abc(${args.join(', ')})`;
+    const e = getEval({ abc });
+
+    assert.strictEqual(e('abc(calc(10px + 1px) 10px)'), 'abc(11px 10px)');
   });
 
   it('handles space-separated arguments with variables', () => {
@@ -174,6 +292,52 @@ describe('Evaluation Tests', () => {
       }
     `;
     expect(e(input)).to.be.cssEquivalent(expectedOutput);
+  });
+
+  it('should not evaluate vars without input', () => {
+    const e = getEval();
+    const input = 'var(--a)';
+    const result = e(input);
+   
+    expect(result).to.equal(input);
+  });
+
+  it('should not evaluate complex expression with vars without input', () => {
+    const e = getEval();
+    const input = `calc(
+      (
+        (var(--primary-r) * 299 +
+        var(--primary-g) * 587) +
+        var(--primary-b) * 114
+      ) / 1000
+    )`
+    const result = e(input);
+   
+    expect(result).to.contain('calc(');
+    expect(result).to.contain('var(--primary-r)');
+
+    expect(result).to.be.cssEquivalent(input);
+
+    // const computed = e(input, {
+    //   '--primary-r': 255,
+    //   '--primary-g': 25,
+    //   '--primary-b': 235,
+    // });
+
+    // expect(computed).to.equal(63.5);
+  });
+
+  it('evaluates relative color', () => {
+    const e = getEval();
+    // const input = e(`
+    //   rgb(
+    //     from rgba(255, 126, 235, 1)
+    //     calc(max(0, min((((r * 299 + g * 587) + b * 114) / 1000 - 128) * 1000 * -1, 255)))
+    //     calc(max(0, min((((r * 299 + g * 587) + b * 114) / 1000 - 128) * 1000 * -1, 255)))
+    //     calc(max(0, min((((r * 299 + g * 587) + b * 114) / 1000 - 128) * 1000 * -1, 255))))
+    //   `);
+    const input = e(`rgba(from rgb(255 126 235 / 0.5) r g b / a)`);
+    expect(input).to.be.equal('rgb(255 126 235 / 0.5)');
   });
 
   describe('Environment Tests', () => {

@@ -216,8 +216,6 @@ export const applyCorrections = (colorData, corrections = []) => {
         return { name, input, values: correctedValues };
     });
 
-    console.log('correctedData: ', correctedData);
-
     return correctedData;
 };
 
@@ -279,14 +277,11 @@ export function collectColorData(options = {}) {
             };
         });
 
-        console.log(colorData);
-
         colorDataList.push(colorData);
     });
 
     colorDataList = applyCorrections(colorDataList, CORRECTIONS);
 
-    console.log(colorDataList);
 
     if (summary) {
         return getSummary(colorDataList);

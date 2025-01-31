@@ -28,7 +28,7 @@ const css = cssf`
   }
 
   h2 {
-    font-size: ifelse(var(--is-big), 3rem, 1.4rem);
+    font-size: calc(ifelse(var(--is-big), 3rem, 1.4rem));
   }
 `;
 
@@ -78,22 +78,22 @@ const css = cssf`
     color: black;
     min-width: 0;
     min-height: 0;
-    max-width: ifelse(var(--is-box-hidden), 0px, 2000px);
-    max-height: ifelse(var(--is-box-hidden), 0px, 2000px);
-    padding: ifelse(var(--is-box-hidden), 0rem, var(--box-padding));
+    max-width: calc(ifelse(var(--is-box-hidden), 0px, 2000px));
+    max-height: calc(ifelse(var(--is-box-hidden), 0px, 2000px));
+    padding: calc(ifelse(var(--is-box-hidden), 0rem, var(--box-padding)));
     margin: 0;
-    margin-top: ifelse(
+    margin-top: calc(ifelse(
       var(--is-box-hidden),
       (var(--box-margin-y) / 2 * -1), /* Collapsing margins */
       var(--box-margin-y)
-    );
-    margin-bottom: ifelse(
+    ));
+    margin-bottom: calc(ifelse(
       var(--is-box-hidden),
       (var(--box-margin-y) / 2 * -1), /* Collapsong margins */
       var(--box-margin-y)
-    );
+    ));
     overflow: hidden;
-    order: ifelse(var(--is-box-hidden), 1000, 0);
+    order: calc(ifelse(var(--is-box-hidden), 1000, 0));
   }
 `;
 

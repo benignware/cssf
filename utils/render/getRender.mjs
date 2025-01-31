@@ -13,9 +13,17 @@ export const getRender = (customEnv = {}, baseEnv = ENV_NEXT) => {
   return function render(input, options = {}) {
     const ast = CSS.parse(input);
     const beforeEnv = Env.getEnv();
+    const {
+      transformers = [],
+      callback = (target, args) => {
+        const result = target(...args);
+
+        return result;
+      }
+    } = options;
   
     Env.setEnv(renderEnv);
-  
+
     csstree.walk(ast, {
       leave(node) {
         if (node.type === 'Function') {
@@ -32,7 +40,9 @@ export const getRender = (customEnv = {}, baseEnv = ENV_NEXT) => {
       },
     });
   
-    const s = CSS.stringify(ast);
+    const s = CSS.stringify(ast, {
+      transformers,
+    });
 
     Env.setEnv(beforeEnv);
   

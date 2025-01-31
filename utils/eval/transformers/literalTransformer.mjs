@@ -18,8 +18,17 @@ export const literalTransformer = (options = {}) => (ast) => {
           return;
         }
 
-        if (!validIdentifiers.includes(node.name)) {
-          
+        if (node.type === 'Function' && node.name && !validIdentifiers.includes(node.name)) {
+          const camel = camelCase(node.name);
+
+          if (validIdentifiers.includes(camel)) {
+            node.name = camel;
+
+            return;
+          }
+        }
+
+        if (node.name && !validIdentifiers.includes(node.name)) {
           const nameArg = {
             type: 'String',
             value: node.name,
@@ -29,6 +38,12 @@ export const literalTransformer = (options = {}) => (ast) => {
             type: 'Operator',
             value: ',',
           };
+
+          // const argsList = node.children.copy();
+
+          // node.children.forEach((arg) => {
+          //   console.log('ARG: ', arg);
+          // });
 
           node.children.prependData(operator);
           node.children.prependData(nameArg);
@@ -40,9 +55,9 @@ export const literalTransformer = (options = {}) => (ast) => {
       }
 
       if (node.type === 'Identifier') {
-        const [sign = '', name] = (node.name.match(/^(-)?([^-].*)$/) || ['']).slice(1)
+        const [sign = '', name] = (node.name.match(/^(-)?([^-].*)$/) || ['']).slice(1);
         
-        if (!validIdentifiers.includes(name)) {
+        if (node.name && !validIdentifiers.includes(name)) {
           node.type = 'String';
           node.value = node.name;
   
@@ -71,7 +86,7 @@ export const literalTransformer = (options = {}) => (ast) => {
         return;
       }
 
-      if (node.unit) {
+      if (node.value !== undefined && node.unit) {
         node.type = 'String';
         node.value = node.value + node.unit;
       }

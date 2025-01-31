@@ -14,11 +14,11 @@ describe('System Baseline 2024', () => {
     });
 
     it('should handle modulus with zero as divisor gracefully', () => {
-      expect(e('mod(5, 0)')).to.equal('NaN'); // Ensure it handles zero divisor gracefully
+      expect(e('mod(5, 0)')).to.be.NaN; // Ensure it handles zero divisor gracefully
     });
 
     xit('should handle modulus with zero and units gracefully', () => {
-      expect(e('mod(5px, 0px)')).to.equal('NaN'); // Ensure it handles zero divisor gracefully
+      expect(e('mod(5px, 0px)')).to.be.NaN; // Ensure it handles zero divisor gracefully
     });
   });
 
@@ -38,11 +38,11 @@ describe('System Baseline 2024', () => {
     });
 
     it('should handle zero as divisor gracefully', () => {
-      expect(e('rem(5, 0)')).to.equal('NaN');
+      expect(e('rem(5, 0)')).to.be.NaN;
     });
 
     xit('should handle zero as divisor with units gracefully', () => {
-      expect(e('rem(5px, 0px)')).to.equal('NaN');
+      expect(e('rem(5px, 0px)')).to.be.NaN;
     });
   });
 

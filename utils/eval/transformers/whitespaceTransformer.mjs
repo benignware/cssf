@@ -90,8 +90,6 @@ export const whitespaceTransformer = (options = {}) => (ast) => {
               return acc;
             }, []);
 
-
-            console.log('nodes: ', nodes);
             node = csstree.fromPlainObject({
               type: 'Function',
               name: '_join',
@@ -114,8 +112,6 @@ export const whitespaceTransformer = (options = {}) => (ast) => {
           } else {
             node = argList.first();
           }
-
-          console.log('ADD NODE: ', node);
 
           children.appendData(node);
         });

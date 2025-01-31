@@ -4,34 +4,7 @@ Use today's css now. CSS pre-processor ecosystem with focus on runtime computati
 
 CSSF enhances css by a set of functions that take care of your dynamic values at run-time, such as color shade or contrast and lots more. Did you even know that you can actually use conditions in calc? CSSF breaks it down to arithmetics. 
 
-
-https://css-tricks.com/a-complete-guide-to-calc-in-css/
-https://css-tricks.com/using-absolute-value-sign-rounding-and-modulo-in-css-today/
-
-
-https://css-tricks.com/css-variables-calc-rgb-enforcing-high-contrast-colors/
-
-https://css-tricks.com/how-supports-works/
-
-https://supportscss.dev/
-
-https://medium.com/hypersphere-codes/randomness-in-css-b55a0845c8dd
-
-
-https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
-
-https://www.smashingmagazine.com/2023/08/oklch-color-spaces-gamuts-css/
-
-https://www.doozytools.com/color-tools/color-converter
-
-https://www.easyrgb.com/en/convert.php#inputFORM
-
-https://oklch.com/#70,0.1,14,100
-
-https://colordesigner.io/convert/hsvtohsl
-
-
-From now on, you can do conditionals in css, e.g. something like the following...
+## Conditions
 
 <!-- Example -->
 ```html
@@ -46,7 +19,7 @@ const css = cssf`
   h2 {
     --is-big: 0;
     color: red;
-    font-size: ifelse(var(--is-big), 70px, 10px);
+    font-size: calc(ifelse(var(--is-big), 70px, 10px));
   }
 `;
 
@@ -55,27 +28,25 @@ const style = document.querySelector('#example1-style');
 style.textContent = css;
 ```
 
-
 ## Color contrast
 
 <!-- Example -->
 ```html
 <style id="example2-style"></style>
-<h2>Hello World</h2>
+<h2 class="text-bg-light">Light Background</h2>
+<h2 class="text-bg-dark">Dark Background</h2>
 ```
 
 ```mjs
 import { cssf } from 'cssf';
 
 const css = cssf`
-  h2 {
-    --bg-r: 255;
-    --bg-g: 255;
-    --bg-b: 0;
-    --bg: rgba(var(--bg-r), var(--bg-g), var(--bg-b));
-    background-color: var(--bg);
-    color: color-contrast(rgba(var(--bg-r), var(--bg-g), var(--bg-b), 1) vs #fff, #000);
+  [class*="text-bg-"] {
+    background-color: rgb(var(--bg-r), var(--bg-g), var(--bg-b));
+    color: color-contrast(rgb(var(--bg-r), var(--bg-g), var(--bg-b)) vs #fff, #000);
+    -webkit-transform: translateZ(0);
   }
+
 `;
 
 const style = document.querySelector('#example2-style');
@@ -83,8 +54,19 @@ const style = document.querySelector('#example2-style');
 style.textContent = css;
 ```
 
+```css
+.text-bg-light {
+  --bg-r: 255;
+  --bg-g: 255;
+  --bg-b: 128;
+}
 
-
+.text-bg-dark {
+  --bg-r: 0;
+  --bg-g: 128;
+  --bg-b: 0;
+}
+```
 
 ----
 
@@ -169,3 +151,42 @@ Make sure, you do not break it. You may refine the last test case, but don't tou
 Please note the comments in the test file.
 Full code of getColorFn.mjs, please. Do not only provide the changed exoported function.
 
+
+
+
+## References
+
+https://css-tricks.com/a-complete-guide-to-calc-in-css/
+
+https://css-tricks.com/using-absolute-value-sign-rounding-and-modulo-in-css-today/
+
+https://css-tricks.com/css-variables-calc-rgb-enforcing-high-contrast-colors/
+
+https://css-tricks.com/how-supports-works/
+
+https://supportscss.dev/
+
+https://medium.com/hypersphere-codes/randomness-in-css-b55a0845c8dd
+
+https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
+
+https://www.smashingmagazine.com/2023/08/oklch-color-spaces-gamuts-css/
+
+https://www.doozytools.com/color-tools/color-converter
+
+https://www.easyrgb.com/en/convert.php#inputFORM
+
+https://oklch.com/#70,0.1,14,100
+
+https://colordesigner.io/convert/hsvtohsl
+
+
+
+
+/** 
+ * Recursively interate through tree and change append name to each var function's identifier, 
+ * e.g. var(--color-primary) => var(--color-primary-r), var(--color-primary-g), var(--color-primary-b), var(--color-primary-a)
+ * handle default values recursively, e.g. var(--color-primary, rgba(0, 0, 0, 1)) => rgba(var(--color-primary-r, 0), var(--color-primary-g, 0), var(--color-primary-b, 0), var(--color-primary-a, 1))
+ * handle nested var functions, e.g. var(--color-primary, var(--color-secondary, rgba(0, 0, 0, 1))) => rgba(var(--color-primary-r, var(--color-secondary-r, 0)), var(--color-primary-g, var(--color-secondary-g, 0)), var(--color-primary-b, var(--color-secondary-b, 0)), var(--color-primary-a, var(--color-secondary-a, 1)))
+ * resolve hex and named colors, e.g. var(--color-primary, red) => rgba(var(--color-primary-r, 255), var(--color-primary-g, 0), var(--color-primary-b, 0), var(--color-primary-a, 1))
+ */

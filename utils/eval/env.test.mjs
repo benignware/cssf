@@ -14,11 +14,11 @@ describe('env', () => {
     });
 
     it('should handle modulus with zero as divisor gracefully', () => {
-      expect(e('mod(5, 0)')).to.equal('NaN'); // Ensure it handles zero divisor gracefully
+      expect(e('mod(5, 0)')).to.be.NaN; // Ensure it handles zero divisor gracefully
     });
 
     xit('should handle modulus with zero and units gracefully', () => {
-      expect(e('mod(5px, 0px)')).to.equal('NaN'); // Ensure it handles zero divisor gracefully
+      expect(e('mod(5px, 0px)')).to.be.NaN; // Ensure it handles zero divisor gracefully
     });
   });
 
@@ -76,11 +76,11 @@ describe('env', () => {
     });
 
     it('should return NaN for base 1', () => {
-      expect(e('log(10, 1)')).to.equal('NaN');
+      expect(e('log(10, 1)')).to.be.NaN;
     });
 
     it('should return NaN for negative numbers', () => {
-      expect(e('log(-10)')).to.equal('NaN');
+      expect(e('log(-10)')).to.be.NaN;
     });
   });
 
@@ -100,11 +100,11 @@ describe('env', () => {
     });
 
     it('should handle zero as divisor gracefully', () => {
-      expect(e('rem(5, 0)')).to.equal('NaN');
+      expect(e('rem(5, 0)')).to.be.NaN;
     });
 
     xit('should handle zero as divisor with units gracefully', () => {
-      expect(e('rem(5px, 0px)')).to.equal('NaN');
+      expect(e('rem(5px, 0px)')).to.be.NaN;
     });
   });
 
@@ -148,7 +148,7 @@ describe('env', () => {
     });
 
     it('should return NaN for negative input', () => {
-      expect(e('sqrt(-4)')).to.be.equal('NaN');
+      expect(e('sqrt(-4)')).to.be.NaN;
     });
 
     it('should return 0 for input 0', () => {
@@ -202,7 +202,7 @@ describe('env', () => {
     });
 
     it('should return NaN', () => {
-      expect(e('NaN')).to.be.equal('NaN');
+      expect(e('NaN')).to.be.NaN;
     });
 
     it('should return Infinity', () => {

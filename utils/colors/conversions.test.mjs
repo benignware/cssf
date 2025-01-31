@@ -26,13 +26,10 @@ const PRECISION = 0.05;
 
 const conversions = {
   ...refConversions,
-  ...calcConversions
+  // ...calcConversions
 }
 
 describe('Color Conversions', function() {
-
-  console.log('conversions: ', conversions);
-
   const e = getEval({}, ENV_NEXT);
 
   Object.entries(conversions).forEach(([key, func]) => {

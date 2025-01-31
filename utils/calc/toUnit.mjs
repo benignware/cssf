@@ -1,4 +1,5 @@
 import { number, unit } from './number.mjs';
+import { unwrap } from './unwrap.mjs';
 import { stripCalc } from './stripCalc.mjs';
 
 export const toUnit = (value, toUnit) => {
@@ -35,7 +36,7 @@ export const toUnit = (value, toUnit) => {
     }
   }
 
-  const unwrapped = stripCalc(value);
+  const unwrapped = unwrap(value);
 
   switch (toUnit) {
     case '%':
@@ -45,6 +46,15 @@ export const toUnit = (value, toUnit) => {
     case 'turn':
       return `calc(${unwrapped} / 360 * 1turn)`; 
   }
+
+  // switch (toUnit) {
+  //   case '%':
+  //     return !unwrapped.endsWith(' * 100%') ? `calc(${unwrapped} * 100%)` : value;
+  //   case 'deg':
+  //     return!unwrapped.endsWith(' * 1deg') ? `calc(${unwrapped} / 1deg)` : value;
+  //   case 'turn':
+  //     return !unwrapped.endsWith(' / 360 * 1turn') ? `calc(${unwrapped} / 360 * 1turn)` : value;
+  // }
 
   return value;
 };

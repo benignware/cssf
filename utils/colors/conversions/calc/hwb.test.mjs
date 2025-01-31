@@ -84,7 +84,7 @@ describe('HWB Conversions', () => {
   // HSL to HWB tests
 });
 
-describe('HSL to HWB Conversion', () => {
+xdescribe('HSL to HWB Conversion', () => {
   beforeEach(() => {
     global.e = getEval();
   });

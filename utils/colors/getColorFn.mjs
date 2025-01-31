@@ -6,7 +6,8 @@ import { parseFn } from '../ast/parseFn.mjs';
 import { hexToRgb } from './hexToRgb.mjs';
 import { isColorKey, keyToRgb } from './keyToRgb.mjs';
 import { Env } from '../env/Env.mjs';
-import { isNumber, number, unit, unwrap } from '../calc/number.mjs';
+import { isNumber, number, unit, } from '../calc/number.mjs';
+import { unwrap } from '../calc/unwrap.mjs';
 import { toNumeric } from '../calc/toNumeric.mjs';
 import { toUnit } from '../calc/toUnit.mjs';
 import { stripCalc } from '../calc/stripCalc.mjs';
@@ -22,9 +23,25 @@ export const colorConverter = new ColorConverter();
 const colorEnv = new WeakMap();
 
 export const getColorFn = function(name, colorSpace, conversions = {}, options = {}) {
-  const { identifiers = null, units = ['', '', ''], legacyFormat = false, output = {}, input = {} } = options;
-  const { colorSpace: outputColorSpace, funcName: outputFuncName, format, units: outputUnits = ['', '', ''] } = output;
-  const { colorSpace: inputColorSpace, identifiers: inputIdentifiers, funcName: inputFuncName, units: inputUnits = ['', '', ''] } = input;
+  const {
+    identifiers = null,
+    units = ['', '', ''],
+    legacyFormat: legacyFormatOption = 'auto',
+    output = {},
+    input = {}
+  } = options;
+  const {
+    colorSpace: outputColorSpace,
+    funcName: outputFuncName,
+    format,
+    units: outputUnits = ['', '', '']
+  } = output;
+  const {
+    colorSpace: inputColorSpace,
+    identifiers: inputIdentifiers,
+    funcName: inputFuncName,
+    units: inputUnits = ['', '', '']
+  } = input;
 
   colorConverter.addConversions(conversions);
   
@@ -50,21 +67,27 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
 
   function fn(...args) {
       const input = [...arguments].join(', ');
-      let { from, colorSpace: argSpace, c1, c2, c3, a } = getColorArgs(input);
+      let cArgs = getColorArgs(input);
 
-      // console.log();
-      // console.log('-------------------');
-      // console.log('* ', name, ' - ', `${name}(${input})`);
+      let { from, colorSpace: argSpace, c1, c2, c3, a } = cArgs;
+
+      const isLegacySyntaxInput = !from && !argSpace && input.startsWith(`${c1}, ${c2}, ${c3}`);
+
+      // console.log('isLegacySyntaxInput: ', input, args.length === 1, isLegacySyntaxInput);
+
+      // const legacyFormat = legacyFormatOption === 'auto'
+      // ? isLegacySyntaxInput
+      // : legacyFormatOption;
+
+      const legacyFormat = isLegacySyntaxInput;
 
       let fnName = name;
-
       let wasConverted = false;
-
       let outFrom = null;
-
       let result = null;
 
       if (from) {
+          
           const toSpace = argSpace && colorSpaces.includes(argSpace) ? argSpace : colorSpace;
 
           let fromSpace = null;
@@ -78,6 +101,8 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
               const fn = env[fromName];
               
               fromColorArgs = getColorArgs(fromArgs.join(', '));
+
+              // console.log('fromColorArgs: ', fromColorArgs);
 
               if (fn && colorEnv.has(fn)) {
                 const { colorSpace: fnSpace, identifiers: fromIdentifiers } = colorEnv.get(fn);
@@ -133,10 +158,16 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
           }
 
           const identifiers = colorSpaceIdentifiers[toSpace] || [];
+
+          if (!identifiers.includes('a')) {
+              identifiers.push('a');
+          }
+          
           const [f1, f2, f3, fa] = f;
+          
           const cMap = Object.assign(
               {},
-              ...[f1, f2, f3].map((v, index) => ({
+              ...[f1, f2, f3, fa].map((v, index) => ({
                   [identifiers[index] || `c${index + 1}`]: v
               }))
           );
@@ -187,25 +218,32 @@ export const getColorFn = function(name, colorSpace, conversions = {}, options =
       let c = [c1, c2, c3];
 
       c = c.map(v => {
-        const w = unwrap(`calc(${stripCalc(v)})`);
+        // const w = unwrap(`calc(${stripCalc(v)})`);
 
-        return w;
+        // return w;
+
+        return v;
       });
   
       c = c.map((v, i) => toUnit(v, outputUnits[i] || units[i]), wasConverted);
-      
-
-      // console.log('$ ', `${fnName}(${c.join(', ')})`);
 
       [c1, c2, c3] = c;
 
+      const isLegacyFormat = typeof legacyFormat === 'function'
+        ? legacyFormat({ fnName, colorSpace, colorSpaces, identifiers, from, to: argSpace, c1, c2, c3, a })
+        : legacyFormat;
+
       let outputArgs = [ outFrom, argSpace, c1, c2, c3]
         .filter(arg => typeof arg !== 'undefined' && arg !== null)
-        .join(legacyFormat ? ', ' : ' ')
+        .join(isLegacyFormat ? ', ' : ' ')
 
-      if (typeof a !== 'undefined' && a !== 1) {
-        outputArgs += legacyFormat ? ', ' : ' / ';
+      if (typeof a !== 'undefined' && (a !== 1 || isLegacyFormat)) {
+        outputArgs += isLegacyFormat ? ', ' : ' / ';
         outputArgs += a;
+      }
+
+      if (isLegacyFormat && a >= 0 && ['rgb', 'hsl', 'hwb'].includes(colorSpace)) {
+        fnName = fnName.replace(/a$/, '') + 'a';
       }
 
       result = `${fnName}(${outputArgs})`;

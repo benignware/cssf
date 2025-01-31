@@ -14,33 +14,53 @@ const unit = (value) => {
   return (String(value).match(/^s*[-\d.e]+([a-z%]{2,})/) || [])[1] || '';
 };
 
-const getArgs = (...args) => {
-  return [...args];
-  return args.map(arg => {
-    if (arg instanceof sass.SassColor) {
-      return `rgba(${arg.getR()}, ${arg.getG()}, ${arg.getB()}, ${arg.getA()})`;
-    }
+// const getArgs = (...args) => {
+//   return [...args];
+  // return args.map(arg => {
+  //   if (arg instanceof sass.SassColor) {
+  //     return `rgba(${arg.getR()}, ${arg.getG()}, ${arg.getB()}, ${arg.getA()})`;
+  //   }
 
-    if (arg instanceof sass.SassNumber) {
+  //   if (arg instanceof sass.SassNumber) {
 
-      // return arg.getUnit()
-      //   ? `${arg.getValue()}${arg.getUnit()}`
-      //   : arg.getValue();
-      return arg;
-    }
+  //     // return arg.getUnit()
+  //     //   ? `${arg.getValue()}${arg.getUnit()}`
+  //     //   : arg.getValue();
+  //     return arg;
+  //   }
 
-    if (arg instanceof sass.SassString) {
-      return arg.getValue ? arg.getValue() : arg;
-    }
+  //   if (arg instanceof sass.SassString) {
+  //     return arg.getValue ? arg.getValue() : arg;
+  //   }
 
-    return String(arg) !== 'null' ? String(arg) : undefined;
-  });
-};
+  //   return String(arg) !== 'null' ? String(arg) : undefined;
+  // });
+// };
 
 const fnProxy = (fn) => {
-  return function (args) {
-    args = getArgs(...args);
+  const name = fn.name;
+  const f = function (...args) {
+    args = args.map(s => {
+      // if (s instanceof sass.SassColor) {
+      //   return `rgba(${s.getR()}, ${s.getG()}, ${s.getB()}, ${s.getA()})`;
+      // }
 
+      // if (s instanceof sass.SassNumber) {
+      //   return s.getUnit()
+      //     ? `${s.getValue()}${s.getUnit()}`
+      //     : s.getValue();
+      // }
+
+      // if (s instanceof sass.SassString) {
+      //   return s.getValue ? s.getValue() : s;
+      // }
+
+      // return String(s) !== 'null' ? String(s) : 'xxxxxxx';
+      return s;
+    });
+    // args = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
+    // console.log('CALL SASS PROXY FN: ', name, args.length === 1 ? args[0]);
+    
     const result = fn(...args);
 
     if (result instanceof sass.SassString) {
@@ -66,26 +86,41 @@ const fnProxy = (fn) => {
     }
 
     return new sass.Value(result);
-
-    return result;
   };
+
+  Object.defineProperty(f, 'name', { value: name, writable: false });
+
+  return f;
 };
 
 export const getSassProxy = (env = {}, options = {}) => {
+  const { meta } = options;
   return Object.keys(env).reduce((acc, key) => {
+    
     const fn = env[key];
-    const name = kebabCase(key);
-    const meta = describe(fn);
-    const p = meta.params.map(({ name, value }) => `$${name}${value ? `: ${value}` : ''}`).join(', ');
+    const fnMeta = meta[key] || describe(fn);
+
+    const p = fnMeta.params.map(({ name, value }) => `$${name}${value ? `: ${value}` : ''}`).join(', ');
     const sig = `${key}(${p})`;
-    acc[sig] = fnProxy(fn);
+    const fnp = fnProxy(fn);
+    acc[sig] = fnp;
+
+    const kebab = kebabCase(key);
+
+    if (kebab !== key) {
+      const sig = `${kebab}(${p})`;
+      acc[sig] = fnp;
+    }
+    
     return acc;
   }, {});
 };
 
 export class SassTag extends RenderTag {
   get env() {
-    return getSassProxy(super.env);
+    return getSassProxy(super.env, {
+      meta: this.meta
+    });
   }
 
   render(string) {

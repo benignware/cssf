@@ -47,6 +47,13 @@ class FnMeta {
 }
 
 export const describe = (fn, options = {}) => {
+  if (typeof fn === 'object') {
+    return Object.entries(fn).reduce((acc, [key, value]) => {
+      acc[key] = describe(value, options);
+      return acc;
+    }, {});
+  }
+
   const { ignore = /^___/ } = options;
   let params = getParams(fn);
 

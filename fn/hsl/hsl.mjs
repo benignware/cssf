@@ -5,6 +5,6 @@ export const hsl = getColorFn("hsl", 'hsl', {
   ...hslCalcConversions
 }, {
   units: ['deg', '%', '%'],
-  legacyFormat: true,
+  // legacyFormat: 'auto',
 });
 export const hsla = hsl;

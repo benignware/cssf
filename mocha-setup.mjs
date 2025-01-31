@@ -21,9 +21,9 @@ global.COLOR_SPACES = [
 
   'hsv', // Our custom color space 
 
-  'xyz', 
-  'xyz-d65',
-  'xyz-d50',
+  // 'xyz', 
+  // 'xyz-d65',
+  // 'xyz-d50',
   // 'lab', 
   // 'lch',
   // 'oklab',

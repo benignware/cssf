@@ -6,6 +6,7 @@ import { gte } from "../../../../fn/gte/gte.mjs";
 import { lt } from "../../../../fn/lt/lt.mjs";
 import { and } from "../../../../fn/and/and.mjs";
 import { eq } from "../../../../fn/eq/eq.mjs";
+import { getEval } from "../../../../utils/eval/getEval.mjs";
 
 export const hslToRgb = (h, s, l) => {
   const C = `(1 - ${abs(`2 * ${l} - 1`)}) * ${s}`;
@@ -54,7 +55,7 @@ export const rgbToHsl = (r, g, b) => {
   const min = `min(${rn}, ${gn}, ${bn})`;
 
   // Calculate Chroma
-  const C = `(${max} - ${min})`;
+  let C = `(${max} - ${min})`;
 
   // Calculate Lightness
   let l = `((${max} + ${min}) / 2)`;
@@ -62,6 +63,8 @@ export const rgbToHsl = (r, g, b) => {
   // Define a small epsilon to avoid division by zero
   const epsilon = 1e-20;
   // const epsilon = 1.1368683772161603e-13;
+
+  // C = 123;
 
   // Calculate s1 and s2 with clamped denominators
   const s1 = `${C} / max(${max} + ${min}, ${epsilon})`;
@@ -72,10 +75,26 @@ export const rgbToHsl = (r, g, b) => {
 
   // Calculate Hue
   const h1 = ifelse(eq(rn, max), `(${gn} - ${bn}) / ${C}`, 0);
+  // const h1 = ifelse(eq(rn, max), `(${gn} - ${bn}) / ${C}`, 0);
+  // const h1 = `(${gn} - ${bn}) / ${C}`;
   const h2 = ifelse(eq(gn, max), `(${bn} - ${rn}) / ${C} + 2`, 0);
   const h3 = ifelse(eq(bn, max), `(${rn} - ${gn}) / ${C} + 4`, 0);
 
-  const hRaw = ifelse(eq(C, 0), 0, ifelse(eq(rn, max), h1, ifelse(eq(gn, max), h2, h3)));
+  
+  const ev = getEval();
+
+  const hx = ifelse(eq(rn, max), h1, ifelse(eq(gn, max), h2, h3));
+
+  const hRaw = ifelse(eq(C, 0), 0, hx);
+
+  // const inp = `calc(${ifelse(eq(C, 0), 0, hx)})`;
+
+  // // console.log('****************** C: ', inp, ev(inp));
+  // console.log('HX: ', hx);
+  
+  // console.log('****************** C: ', ev(`calc(${hx})`));
+
+  // process.exit();
   // const h = `calc(${mod(`(${hRaw} * 60)`, 360)})`;
   // const h = `mod(${hRaw} * 60, 360)`;
   // let h = `mod(((${hRaw} * 60) + 360), 360)`;
@@ -83,12 +102,14 @@ export const rgbToHsl = (r, g, b) => {
 
   // let h = mod(`((${hRaw}) * 60) + 360`, 360);
 
-  let h = `mod((${hRaw}) * 60 + 360, 360)`;
+  let h = `mod((${hRaw}) * 60deg + 360deg, 360)`;
 
   // h = round(h);
-  // h = `clamp(${h}, 0, 360)`;
+  h = `clamp(${h}, 0, 360)`;
   l = `clamp(${l}, 0, 1)`;
   s = `clamp(${s}, 0, 1)`;
+
+  // return [ C, 10, 0 ];
 
   return [ h, s, l ];
 };

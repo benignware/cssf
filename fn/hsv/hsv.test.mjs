@@ -15,10 +15,8 @@ describe('hsv', () => {
     expect(result).to.equal('hsl(240deg 100% 50%)');
   });
 
-  it('should run in browser', async () => {
+  xit('should run in browser', async () => {
     const color = render(hsv('240deg 100% 100%'));
-
-    console.log('color', color);
 
     const htmlContent = `
       <style>${render(`

@@ -28,7 +28,7 @@ describe('System Next', () => {
     });
 
     xit('should handle non-numeric values gracefully', () => {
-      expect(e('abs("string")')).to.equal('NaN'); // Adjust based on your implementation of handling non-numeric values
+      expect(e('abs("string")')).to.be.NaN; // Adjust based on your implementation of handling non-numeric values
     });
   });
 
@@ -56,7 +56,7 @@ describe('System Next', () => {
     });
 
     xit('should handle non-numeric values gracefully', () => {
-      expect(e('sign("string")')).to.equal('NaN'); // Adjust based on your implementation of handling non-numeric values
+      expect(e('sign("string")')).to.be.NaN; // Adjust based on your implementation of handling non-numeric values
     });
   });
 });

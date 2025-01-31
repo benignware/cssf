@@ -1,4 +1,5 @@
 import * as csstree from 'css-tree';
+import { CSS } from '../../ast/CSS.mjs';
 
 export const argumentTransformer = (options = {}) => (ast) => {
   csstree.walk(ast, {
@@ -6,6 +7,7 @@ export const argumentTransformer = (options = {}) => (ast) => {
       if (!node) {
         return;
       }
+      
       if (node.type === 'Function') {
         const children = node.children.copy();
 
@@ -56,11 +58,21 @@ export const argumentTransformer = (options = {}) => (ast) => {
 
             argNode.children.appendData({
               type: 'WhiteSpace',
-              value: ' ',
+              value: '',
             });
 
             for (const argToken of arg) {
+              // const rawArg = argToken.value !== undefined ? argToken.value : CSS.stringify(argToken);
+
+              // console.log('rawArg: ', argToken.value, `"${rawArg}"`);
+
+              // argNode.children.appendData({
+              //   type: 'String',
+              //   value: rawArg.trim(),
+              // });
+
               argNode.children.appendData(argToken);
+
 
               if (argToken !== arg[arg.length - 1]) {
                 const operator = {
@@ -72,13 +84,20 @@ export const argumentTransformer = (options = {}) => (ast) => {
 
                 const whitespace = {
                   type: 'WhiteSpace',
-                  value: ' ',
+                  value: '',
                 };
 
                 argNode.children.appendData(whitespace);
               }
             }
           }
+
+          // const raw = argNode.value !== undefined ? argNode.value : csstree.generate(argNode); 
+
+          // node.children.appendData({
+          //   type: 'String',
+          //   value: raw.trim(),
+          // });
 
           node.children.appendData(argNode);
 
@@ -92,7 +111,7 @@ export const argumentTransformer = (options = {}) => (ast) => {
 
             const whitespace = {
               type: 'WhiteSpace',
-              value: ' ',
+              value: '',
             };
 
             node.children.appendData(whitespace);

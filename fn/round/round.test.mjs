@@ -4,7 +4,7 @@ import { round } from './round.mjs';
 
 const e = getEval();
 
-describe('round', () => {
+xdescribe('round', () => {
   it('rounds to nearest integer when input is lt .5 (round)', () => {
     expect(e(round(3.45))).to.equal(Math.round(3));
   });

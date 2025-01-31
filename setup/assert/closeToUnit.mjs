@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { parseValues } from "./utils.mjs";
 
 const PRECISION = 0.1;
 
@@ -50,49 +50,24 @@ const normalizeDegrees = (value) => ((value % 360) + 360) % 360;
 // Normalize angles to a range [0, 2π) for radians
 const normalizeRadians = (value) => ((value % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
 
-// Function to parse values and units from a complex string
-// Function to parse values and units from a complex string
-// Function to parse numeric values and units from a string
-const parseValues = (str) => {
-  const results = [];
-  
-  // Regex to match numeric values with optional units
-  const regex = /(?:^|\s|\b)([\d.]+(?:e[-+]?\d+)?)([a-zA-Z%]*)/g;
-  let match;
-  
-  while ((match = regex.exec(str)) !== null) {
-    // Ensure valid capture of numeric values and optional units
-    const value = parseFloat(match[1]);
-    const unit = match[2] || '';
-    
-    // Add only if we have a numeric value (ignore empty matches)
-    if (!isNaN(value)) {
-      results.push({ value, unit });
-    }
-  }
-  
-  return results;
-};
-
-
-
-
 export function closeToUnit(_chai, utils) {
   const Assertion = _chai.Assertion;
 
   Assertion.addMethod('closeToUnit', function (expectedStr, precision = PRECISION) {
     const obj = this._obj;
 
+    // Ensure the actual value is a string
+    if (typeof obj !== 'string') {
+      throw new Error('The actual value must be a string');
+    }
+
     // Parse the actual and expected values
     const objValues = parseValues(obj);
     const expectedValues = parseValues(expectedStr);
 
-    // console.log('objValues: ', obj, objValues);
-    // console.log('expectedValues: ', expectedStr, expectedValues);
-
     // Ensure the number of values matches
     if (objValues.length !== expectedValues.length) {
-      throw new Error(`Number of values in the actual and expected strings must match`);
+      throw new Error(`The number of values must match. Expected: ${expectedValues.length}, Actual: ${objValues.length}`);
     }
 
     // Handle precision: single value or array
@@ -104,7 +79,6 @@ export function closeToUnit(_chai, utils) {
 
     // Helper function to check unit and value closeness
     const checkValue = (actual, expected, precision) => {
-      // console.log('CHECK VALUE: ', actual, expected, precision);
       let actualValue = actual.value;
       let actualUnit = actual.unit || 'rad'; // Default to radians if no unit is given
 
