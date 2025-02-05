@@ -79,6 +79,8 @@ cssf.use(new LegacyColorVarsPlugin({
 
 const css = cssf`
   .btn-primary {
+    border-style: solid;
+    border-width: 1px;
     border-color: var(--primary);
     background-color: var(--primary);
     color: color-contrast(var(--primary));
